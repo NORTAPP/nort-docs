@@ -13,35 +13,49 @@
     <link rel="stylesheet" href="assets/css/nort-theme.css">
 </head>
 
-<body>
-    <header class="header fixed-top">
-        <div class="branding docs-branding">
-            <div class="container-fluid position-relative py-2">
-                <div class="docs-logo-wrapper">
-                    <div class="site-logo">
-                        <a class="navbar-brand" href="index.html">
-                            <span class="logo-text">NORT</span>
-                        </a>
-                    </div>
-                </div>
-                <div class="docs-top-utilities d-flex justify-content-end align-items-center">
-                    <span class="nort-live d-none d-lg-inline-flex me-3">
-                        <span class="nort-live-dot"></span>v1.0 · Paper Trading
-                    </span>
-                    <ul class="social-list list-inline mx-md-3 mx-lg-4 mb-0 d-none d-lg-flex">
-                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-github fa-fw"></i></a></li>
-                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-x-twitter fa-fw"></i></a></li>
-                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-telegram fa-fw"></i></a></li>
-                    </ul>
-                    <a href="docs-page.html" class="btn btn-primary d-none d-lg-flex">Read the Docs</a>
-                </div>
-            </div>
-        </div>
-    </header>
-
+<body class="index-page">
     <div class="page-header theme-bg-dark py-5 text-center position-relative">
         <div class="theme-bg-shapes-right"></div>
         <div class="theme-bg-shapes-left"></div>
+
+        <!-- Hero top bar: logo left, version dropdown right -->
+        <div class="container-fluid px-4" style="position:absolute;top:0;left:0;right:0;padding-top:18px;">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- NORT Logo -->
+                <a class="navbar-brand" href="index.html" style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:#fff;text-decoration:none;letter-spacing:0.05em;">NORT</a>
+
+                <!-- Version Dropdown -->
+                <div class="dropdown" id="version-dropdown">
+                    <button class="btn d-flex align-items-center gap-2" id="versionDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false"
+                        style="background:rgba(255,255,255,0.07);border:1px solid rgba(45,212,191,0.35);border-radius:20px;padding:6px 14px;color:#fff;font-size:0.8rem;font-family:'DM Mono',monospace;">
+                        <span class="nort-live-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2DD4BF;box-shadow:0 0 6px #2DD4BF;margin-right:4px;"></span>
+                        v1.0 · Paper Trading
+                        <i class="fas fa-chevron-down ms-1" style="font-size:0.65rem;opacity:0.7;"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="versionDropdownBtn"
+                        style="background:rgba(10,22,40,0.97);border:1px solid rgba(45,212,191,0.25);border-radius:10px;min-width:210px;padding:8px;">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="docs-page.html"
+                                style="color:#fff;border-radius:7px;padding:9px 12px;font-size:0.82rem;font-family:'DM Mono',monospace;">
+                                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2DD4BF;box-shadow:0 0 6px #2DD4BF;flex-shrink:0;"></span>
+                                v1.0 · Paper Trading
+                                <span style="margin-left:auto;font-size:0.7rem;color:#2DD4BF;opacity:0.8;">Current</span>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.1);margin:4px 0;"></li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="#" id="v2-item"
+                                style="color:rgba(255,255,255,0.45);border-radius:7px;padding:9px 12px;font-size:0.82rem;font-family:'DM Mono',monospace;cursor:pointer;">
+                                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);flex-shrink:0;"></span>
+                                v2.0 · On-Chain Trading
+                                <span style="margin-left:auto;font-size:0.7rem;color:rgba(255,255,255,0.35);">Soon</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <div class="container">
             <span class="nort-version mb-3 d-inline-block">VERSION 1.0 · STABLE</span>
             <h1 class="page-heading single-col-max mx-auto mt-2">NORT Documentation</h1>
@@ -200,11 +214,6 @@
 
     <footer class="footer">
         <div class="footer-bottom text-center py-5">
-            <ul class="social-list list-unstyled pb-4 mb-0">
-                <li class="list-inline-item"><a href="#"><i class="fa-brands fa-github fa-fw"></i></a></li>
-                <li class="list-inline-item"><a href="#"><i class="fa-brands fa-x-twitter fa-fw"></i></a></li>
-                <li class="list-inline-item"><a href="#"><i class="fa-brands fa-telegram fa-fw"></i></a></li>
-            </ul>
             <small class="copyright">NORT v1.0 · Paper trading only · <a href="https://www.nortapp.online/" target="_blank" style="color:var(--teal);">nortapp.online</a></small>
         </div>
     </footer>
@@ -217,5 +226,197 @@
     <script src="assets/plugins/simplelightbox/simple-lightbox.min.js"></script>
     <script src="assets/plugins/gumshoe/gumshoe.polyfills.min.js"></script>
     <script src="assets/js/docs.js"></script>
+    <script>
+        // v2 Coming Soon
+        document.getElementById('v2-item').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const existing = document.getElementById('nort-coming-soon-toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.id = 'nort-coming-soon-toast';
+            toast.style.cssText = [
+                'position:fixed','bottom:28px','left:50%','transform:translateX(-50%)',
+                'background:rgba(10,22,40,0.97)','border:1px solid rgba(45,212,191,0.4)',
+                'border-radius:12px','padding:14px 24px','z-index:99999',
+                'color:#fff','font-family:"DM Mono",monospace','font-size:0.82rem',
+                'box-shadow:0 8px 32px rgba(0,0,0,0.5)','display:flex','align-items:center','gap:10px',
+                'backdrop-filter:blur(16px)','transition:opacity 0.4s'
+            ].join(';');
+            toast.innerHTML = '<span style="color:#2DD4BF;font-size:1rem;">⏳</span> v2.0 On-Chain Trading — <strong style="color:#2DD4BF;">Coming Soon</strong>';
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 2800);
+        });
+
+        // ── Index page search: live suggestions from cards + redirect on Enter ──
+        (function () {
+            const form   = document.querySelector('.search-form');
+            const input  = form ? form.querySelector('.search-input') : null;
+            if (!form || !input) return;
+
+            // Build search panel (same visual style as docs-page panel)
+            const panel = document.createElement('div');
+            panel.id = 'nort-index-search-panel';
+            panel.style.cssText = [
+                'display:none',
+                'position:fixed',
+                'top:70px',
+                'right:24px',
+                'width:360px',
+                'z-index:9999',
+                'background:rgba(10,22,40,0.97)',
+                'border:1px solid rgba(45,212,191,0.35)',
+                'border-radius:12px',
+                'box-shadow:0 8px 48px rgba(0,0,0,0.6)',
+                'padding:16px',
+                'backdrop-filter:blur(24px)',
+                'max-height:520px',
+                'overflow-y:auto'
+            ].join(';');
+
+            document.body.appendChild(panel);
+
+            // Close panel on outside click
+            document.addEventListener('click', function(e) {
+                if (!panel.contains(e.target) && !form.contains(e.target)) {
+                    panel.style.display = 'none';
+                }
+            });
+
+            // Build index from the cards on this page
+            function buildIndex() {
+                const index = [];
+                document.querySelectorAll('.card').forEach(function(card) {
+                    const titleEl   = card.querySelector('.card-title-text');
+                    const textEl    = card.querySelector('.card-text');
+                    const linkEl    = card.querySelector('.card-link-mask');
+                    const title     = titleEl ? titleEl.textContent.trim() : '';
+                    const body      = textEl  ? textEl.textContent.trim()  : '';
+                    const href      = linkEl  ? linkEl.getAttribute('href') : 'docs-page.html';
+                    if (title) index.push({ title, body, href, text: title + ' ' + body });
+                });
+                return index;
+            }
+
+            var searchIndex = null;
+
+            function debounce(fn, ms) {
+                var t;
+                return function() { clearTimeout(t); t = setTimeout(fn.bind(this, arguments[0]), ms); };
+            }
+
+            function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+            function showSuggestions(query) {
+                panel.style.display = 'none';
+                var q = query.trim();
+                if (q.length < 2) return;
+
+                if (!searchIndex) searchIndex = buildIndex();
+
+                var terms  = q.split(/\s+/).filter(Boolean);
+                var regex  = new RegExp('(' + terms.map(escapeRe).join('|') + ')', 'gi');
+
+                var hits = searchIndex.filter(function(item) {
+                    regex.lastIndex = 0;
+                    return regex.test(item.text);
+                });
+
+                panel.innerHTML = '';
+
+                // Header
+                var hdr = document.createElement('div');
+                hdr.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:0 4px';
+                var lbl = document.createElement('span');
+                lbl.style.cssText = 'font-family:"DM Mono",monospace;font-size:10px;letter-spacing:0.6px;text-transform:uppercase;color:#2DD4BF';
+                lbl.textContent = hits.length > 0 ? hits.length + ' result' + (hits.length !== 1 ? 's' : '') + ' for "' + q + '"' : 'No results for "' + q + '"';
+                var closeBtn = document.createElement('button');
+                closeBtn.textContent = '✕';
+                closeBtn.style.cssText = 'background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:13px;padding:0;line-height:1';
+                closeBtn.addEventListener('click', function() { panel.style.display = 'none'; });
+                hdr.appendChild(lbl); hdr.appendChild(closeBtn);
+                panel.appendChild(hdr);
+
+                if (hits.length === 0) {
+                    var empty = document.createElement('p');
+                    empty.style.cssText = 'color:rgba(255,255,255,0.45);font-size:12px;margin:6px 4px 2px;font-family:"DM Mono",monospace';
+                    empty.textContent = 'Try a different search term.';
+                    panel.appendChild(empty);
+                } else {
+                    hits.forEach(function(hit) {
+                        var item = document.createElement('a');
+                        item.href = hit.href + '?q=' + encodeURIComponent(q);
+                        item.style.cssText = [
+                            'display:block','padding:10px 12px','margin-bottom:5px',
+                            'border-radius:8px','background:rgba(255,255,255,0.04)',
+                            'border:1px solid rgba(255,255,255,0.07)',
+                            'text-decoration:none','transition:border-color 0.15s,background 0.15s'
+                        ].join(';');
+                        item.addEventListener('mouseenter', function() {
+                            item.style.borderColor = 'rgba(45,212,191,0.4)';
+                            item.style.background   = 'rgba(45,212,191,0.05)';
+                        });
+                        item.addEventListener('mouseleave', function() {
+                            item.style.borderColor = 'rgba(255,255,255,0.07)';
+                            item.style.background   = 'rgba(255,255,255,0.04)';
+                        });
+
+                        // Title row with highlighted match
+                        var titleDiv = document.createElement('div');
+                        titleDiv.style.cssText = 'font-family:"Syne",sans-serif;font-size:13px;font-weight:700;color:#fff;margin-bottom:3px';
+                        titleDiv.innerHTML = hit.title.replace(regex, '<strong style="color:#2DD4BF">$1</strong>');
+
+                        // Snippet
+                        var snippet = hit.body.length > 100 ? hit.body.slice(0, 100) + '…' : hit.body;
+                        var snippetDiv = document.createElement('div');
+                        snippetDiv.style.cssText = 'font-size:11px;color:rgba(255,255,255,0.55);line-height:1.5;font-family:"Plus Jakarta Sans",sans-serif';
+                        snippetDiv.innerHTML = snippet.replace(regex, '<strong style="color:#2DD4BF">$1</strong>');
+
+                        item.appendChild(titleDiv);
+                        item.appendChild(snippetDiv);
+                        panel.appendChild(item);
+                    });
+
+                    // "Press Enter" hint
+                    var hint = document.createElement('div');
+                    hint.style.cssText = 'text-align:center;margin-top:6px;font-size:10px;color:rgba(255,255,255,0.25);font-family:"DM Mono",monospace';
+                    hint.textContent = 'Press Enter to search full docs';
+                    panel.appendChild(hint);
+                }
+
+                panel.style.display = 'block';
+            }
+
+            var debouncedShow = debounce(showSuggestions, 180);
+
+            input.addEventListener('input', function() {
+                var val = input.value.trim();
+                if (val === '') { panel.style.display = 'none'; return; }
+                debouncedShow(val);
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    var q = input.value.trim();
+                    if (q.length >= 2) {
+                        window.location.href = 'docs-page.html?q=' + encodeURIComponent(q);
+                    }
+                }
+                if (e.key === 'Escape') {
+                    panel.style.display = 'none';
+                    input.blur();
+                }
+            });
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var q = input.value.trim();
+                if (q.length >= 2) {
+                    window.location.href = 'docs-page.html?q=' + encodeURIComponent(q);
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -18,34 +18,56 @@
 <body class="docs-page">
     <header class="header fixed-top">
         <div class="branding docs-branding">
-            <div class="container-fluid position-relative py-2">
-                <div class="docs-logo-wrapper">
-                    <button id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible me-2 d-xl-none" type="button">
+            <div class="docs-navbar-inner">
+
+                <!-- LEFT: Hamburger + Logo -->
+                <div class="docs-navbar-left">
+                    <button id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible d-xl-none" type="button">
                         <span></span><span></span><span></span>
                     </button>
-                    <div class="site-logo">
-                        <a class="navbar-brand" href="index.html">
-                            <span class="logo-text">NORT</span>
-                        </a>
+                    <a class="navbar-brand docs-navbar-logo" href="index.html">
+                        <span class="logo-text">NORT</span>
+                    </a>
+                </div>
+
+                <!-- CENTER: Search -->
+                <div class="docs-navbar-center">
+                    <form class="search-form docs-navbar-search">
+                        <i class="fas fa-search docs-search-icon"></i>
+                        <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">
+                        <kbd class="docs-search-kbd">⌘K</kbd>
+                    </form>
+                </div>
+
+                <!-- RIGHT: Version dropdown -->
+                <div class="docs-navbar-right">
+                    <div class="dropdown" id="docs-version-dropdown">
+                        <button class="btn docs-version-btn d-flex align-items-center gap-2" id="docsVersionBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="docs-version-dot"></span>
+                            <span>v1.0 · Paper Trading</span>
+                            <i class="fas fa-chevron-down docs-version-chevron"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end docs-version-menu" aria-labelledby="docsVersionBtn">
+                            <li class="docs-version-menu-label">Switch version</li>
+                            <li>
+                                <a class="dropdown-item docs-version-item active-version" href="docs-page.html">
+                                    <span class="docs-version-item-dot active"></span>
+                                    <span class="docs-version-item-name">v1.0 · Paper Trading</span>
+                                    <span class="docs-version-badge current">Current</span>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider docs-version-divider"></li>
+                            <li>
+                                <a class="dropdown-item docs-version-item docs-v2-item" href="#">
+                                    <span class="docs-version-item-dot"></span>
+                                    <span class="docs-version-item-name">v2.0 · Copy Trading</span>
+                                    <span class="docs-version-badge soon">Soon</span>
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-                <div class="docs-top-utilities d-flex justify-content-end align-items-center">
-                    <div class="top-search-box d-none d-lg-flex">
-                        <form class="search-form">
-                            <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">
-                            <button type="submit" class="btn search-btn" value="Search"><i class="fas fa-search"></i></button>
-                        </form>
-                    </div>
-                    <span class="nort-live d-none d-lg-inline-flex mx-4">
-                        <span class="nort-live-dot"></span>v1.0 · Paper Trading
-                    </span>
-                    <ul class="social-list list-inline mx-md-3 mb-0 d-none d-lg-flex">
-                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-github fa-fw"></i></a></li>
-                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-x-twitter fa-fw"></i></a></li>
-                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-telegram fa-fw"></i></a></li>
-                    </ul>
-                    <a href="index.html" class="btn btn-primary d-none d-lg-flex">← Home</a>
-                </div>
+
             </div>
         </div>
     </header>
@@ -121,7 +143,7 @@
 
                     <section class="docs-section" id="item-1-1">
                         <h2 class="section-heading">What is NORT?</h2>
-                        <p>Polymarket is a prediction market platform where people bet on real-world outcomes. NORT focuses on two market categories: <strong>crypto</strong> and <strong>sports</strong>. At any given moment there are hundreds of active markets across these categories — browsing them manually to find an opportunity is impractical. NORT automates that entire process.</p>
+                        <p>Polymarket is a prediction market platform where people bet on real-world outcomes. NORT focuses on two market categories: <span class="kw-teal">crypto</span> and <span class="kw-teal">sports</span>. At any given moment there are hundreds of active markets across these categories — browsing them manually to find an opportunity is impractical. NORT automates that entire process.</p>
                         <p>It fetches active markets, scores and ranks them by momentum and volume, exposes structured AI advice via OpenClaw, and presents everything through a web dashboard and a Telegram bot.</p>
 
                         <h5>What NORT does in v1:</h5>
@@ -143,7 +165,7 @@
                         <div class="callout-block callout-block-warning">
                             <div class="content">
                                 <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-tags"></i></span>Supported Market Categories</h4>
-                                <p>NORT v1 currently tracks <strong>crypto</strong> and <strong>sports</strong> prediction markets only. Other Polymarket categories are not included in this version.</p>
+                                <p>NORT v1 currently tracks <span class="kw-teal">crypto</span> and <span class="kw-teal">sports</span> prediction markets only. Other Polymarket categories are not included in this version.</p>
                             </div>
                         </div>
                     </section>
@@ -320,7 +342,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <p>The advice response always includes one of three suggested positions: <strong>BUY YES</strong>, <strong>BUY NO</strong>, or <strong>WAIT</strong>. Every response also includes a disclaimer confirming this is paper trading and not financial advice.</p>
+                        <p>The advice response always includes one of three suggested positions: <span class="kw-green">BUY YES</span>, <span class="kw-red">BUY NO</span>, or <span class="kw-blue">WAIT</span>. Every response also includes a disclaimer confirming this is paper trading and not financial advice.</p>
                     </section>
 
                     <section class="docs-section" id="item-3-4">
@@ -468,7 +490,7 @@
                                     <tr><th class="theme-bg-light">Summary</th><td>A plain-English overview of the current market situation.</td></tr>
                                     <tr><th class="theme-bg-light">Why Trending</th><td>An explanation of the momentum and volume signals driving the market's ranking.</td></tr>
                                     <tr><th class="theme-bg-light">Risk Factors</th><td>A list of key uncertainties or risks that could affect the outcome.</td></tr>
-                                    <tr><th class="theme-bg-light">Suggested Plan</th><td>One of three positions: <strong>BUY YES</strong>, <strong>BUY NO</strong>, or <strong>WAIT</strong>.</td></tr>
+                                    <tr><th class="theme-bg-light">Suggested Plan</th><td>One of three positions: <span class="kw-green">BUY YES</span>, <span class="kw-red">BUY NO</span>, or <span class="kw-blue">WAIT</span>.</td></tr>
                                     <tr><th class="theme-bg-light">Confidence</th><td>A normalised indicator of how confident the model is in its suggested plan.</td></tr>
                                 </tbody>
                             </table>
@@ -708,7 +730,7 @@
                         <p>No. NORT v1 is paper trading only. No real Polymarket trades are ever placed. No real funds are moved at any point. All trades are simulated using a virtual balance.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>What markets does NORT cover?</h5>
-                        <p>NORT v1 covers <strong>crypto</strong> and <strong>sports</strong> prediction markets on Polymarket. Other market categories are not included in this version.</p>
+                        <p>NORT v1 covers <span class="kw-teal">crypto</span> and <span class="kw-teal">sports</span> prediction markets on Polymarket. Other market categories are not included in this version.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Where do I access NORT?</h5>
                         <p>The dashboard is live at <a href="https://www.nortapp.online/" target="_blank">nortapp.online</a>. You can also access NORT via Telegram — either through text commands or by opening the full Mini App from the bot chat.</p>
@@ -759,11 +781,6 @@
                 <footer class="footer">
                     <div class="container text-center py-5">
                         <small class="copyright">NORT v1.0 · Paper trading only · <a href="https://www.nortapp.online/" target="_blank" style="color:var(--teal)">nortapp.online</a></small>
-                        <ul class="social-list list-unstyled pt-4 mb-0">
-                            <li class="list-inline-item"><a href="#"><i class="fa-brands fa-github fa-fw"></i></a></li>
-                            <li class="list-inline-item"><a href="#"><i class="fa-brands fa-x-twitter fa-fw"></i></a></li>
-                            <li class="list-inline-item"><a href="#"><i class="fa-brands fa-telegram fa-fw"></i></a></li>
-                        </ul>
                     </div>
                 </footer>
 
@@ -779,5 +796,18 @@
     <script src="assets/plugins/simplelightbox/simple-lightbox.min.js"></script>
     <script src="assets/plugins/gumshoe/gumshoe.polyfills.min.js"></script>
     <script src="assets/js/docs.js"></script>
+    <script>
+        document.querySelector('.docs-v2-item').addEventListener('click', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            var existing = document.getElementById('nort-coming-soon-toast');
+            if (existing) existing.remove();
+            var toast = document.createElement('div');
+            toast.id = 'nort-coming-soon-toast';
+            toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:rgba(10,22,40,0.97);border:1px solid rgba(45,212,191,0.4);border-radius:12px;padding:14px 24px;z-index:99999;color:#fff;font-family:"DM Mono",monospace;font-size:0.82rem;box-shadow:0 8px 32px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px;backdrop-filter:blur(16px);transition:opacity 0.4s';
+            toast.innerHTML = '<span style="color:#2DD4BF;font-size:1rem;">⏳</span> v2.0 On-Chain Trading — <strong style="color:#2DD4BF;">Coming Soon</strong>';
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.style.opacity = '0'; setTimeout(function() { toast.remove(); }, 400); }, 2800);
+        });
+    </script>
 </body>
 </html>
