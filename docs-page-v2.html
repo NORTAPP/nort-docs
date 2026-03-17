@@ -80,9 +80,9 @@
                     <li class="nav-item"><a class="nav-link scrollto" href="#item-4-4">Security & Edge Cases</a></li>
 
                     <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-5"><span class="theme-icon-holder me-2"><i class="fas fa-robot"></i></span>Multi-Agent AI</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-5-1">Sub-Agent Architecture</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-5-2">Conversation Memory</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-5-3">Kiswahili Support</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-5-1">Architecture</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-5-2">Personalization & Memory</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-5-3">Language Support</a></li>
 
                     <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-6"><span class="theme-icon-holder me-2"><i class="fas fa-bolt"></i></span>Auto-Trade Engine</a></li>
                     <li class="nav-item"><a class="nav-link scrollto" href="#item-6-1">How It Works</a></li>
@@ -127,7 +127,7 @@
                             <li><strong>Base Smart Wallets</strong> — Every user gets a Coinbase Smart Wallet (ERC-4337) on Base. Funded via MPesa or card through Transak. Gas is sponsored so users never manually buy ETH or MATIC.</li>
                             <li><strong>USDC Bridge via LI.FI</strong> — USDC moves from Base to Polygon automatically before each real Polymarket trade. LI.FI selects the best route across Across, CCTP, and Stargate.</li>
                             <li><strong>x402 Micro-Payments</strong> — Premium AI advice is gated behind a $0.10 USDC payment on Base. No subscriptions. One payment unlocks one premium advice call.</li>
-                            <li><strong>Multi-Agent AI (OpenClaw v2)</strong> — Three specialised sub-agents (Sentiment, Risk, Technical) now collaborate before producing a final structured output. Conversation memory enables multi-turn follow-up questions.</li>
+                            <li><strong>Multi-Agent AI (AI Agent v2)</strong> — Three specialised sub-agents (Sentiment, Risk, Technical) now collaborate before producing a final structured output. Conversation memory enables multi-turn follow-up questions.</li>
                             <li><strong>Auto-Trade Engine</strong> — When confidence clears the configured threshold, NORT can execute a real Polymarket trade directly from the user's smart wallet — no custody, fully non-custodial.</li>
                             <li><strong>Copy Trading</strong> — Leader users' high-confidence trades are automatically mirrored to opted-in followers.</li>
                             <li><strong>Kiswahili Language Support</strong> — The bot can switch to Kiswahili for any command using <code>/language sw</code>.</li>
@@ -173,7 +173,7 @@
                                 <tbody>
                                     <tr><th class="theme-bg-light">New: Base Network</th><td>User smart wallets live here. x402 payments settle here. Trade receipts are anchored here as on-chain proof.</td></tr>
                                     <tr><th class="theme-bg-light">New: LI.FI Bridge</th><td>Moves USDC from Base to Polygon before each real trade. Called by the AutoTradeEngine — invisible to the user unless they opt into notifications.</td></tr>
-                                    <tr><th class="theme-bg-light">New: Conversation Table</th><td>Stores multi-turn message history per user per market. Powers follow-up questions to OpenClaw without losing context.</td></tr>
+                                    <tr><th class="theme-bg-light">New: Conversation Table</th><td>Stores multi-turn message history per user per market. Powers follow-up questions to AI Agent without losing context.</td></tr>
                                     <tr><th class="theme-bg-light">New: UserPermission Table</th><td>Stores each user's trade mode (paper/real), auto-trade toggle, max bet size, and copy trading settings.</td></tr>
                                     <tr><th class="theme-bg-light">New: AutoTradeEngine</th><td>The backend subsystem that checks confidence, checks permissions, prevents double-execution via idempotency keys, and calls the real trade route when all conditions pass.</td></tr>
                                 </tbody>
@@ -309,7 +309,7 @@
 
 /pay 0xabc123def456...
 → Bot: "Payment verified ✓ — generating premium advice..."
-→ [OpenClaw full analysis returned]</code></pre>
+→ [AI Agent full analysis returned]</code></pre>
                         </div>
                     </section>
 
@@ -342,47 +342,27 @@
                     <header class="docs-header">
                         <h1 class="docs-heading">Multi-Agent AI</h1>
                         <section class="docs-intro">
-                            <p>OpenClaw v2 replaces the single-prompt architecture with a three-sub-agent orchestration model. Each sub-agent specialises in one dimension of analysis. Their outputs are synthesised into a single structured response by an orchestrator — giving advice that is broader, more grounded, and harder to manipulate with a poorly-worded question.</p>
+                            <p>Multi-Agent AI orchestrates Technical, Sentiment, and Risk sub-agents in parallel for fast, secure, and personalized advice. Features include personalization & memory, robust architecture, auto-trading, security, and language support. See the sections below for details.</p>
                         </section>
                     </header>
 
                     <section class="docs-section" id="item-5-1">
-                        <h2 class="section-heading">Sub-Agent Architecture</h2>
-                        <p>Three sub-agents run in parallel before the orchestrator assembles the final output:</p>
-                        <div class="table-responsive my-4">
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <th class="theme-bg-light">Sentiment Agent</th>
-                                        <td>Analyses the three Tavily search results (news, social, context) and produces a sentiment summary — is public opinion bullish, bearish, or neutral on this outcome? Flags any viral narratives or anomalous social signals.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light">Risk Agent</th>
-                                        <td>Evaluates the user's current position (paper balance, open trades, real on-chain USDC balance if available) against the market's odds, expiry, and category. Produces a risk assessment and a recommended maximum position size for this user's current portfolio state.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light">Technical Agent</th>
-                                        <td>Analyses price momentum, volume spike data, and the composite signal score from the signals engine. Produces a technical read — is the price movement sustained or a spike, is volume confirming the move, and where are the key odds levels to watch.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light">Orchestrator (SynthesisAgent)</th>
-                                        <td>Receives all three sub-agent outputs and the raw market data. Weighs them against each other and produces the final structured advice — summary, why trending, risk factors, suggested plan (BUY YES / BUY NO / WAIT), and confidence. For premium calls, position sizing guidance is also included.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="callout-block callout-block-info">
-                            <div class="content">
-                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-info-circle"></i></span>Sub-agents are read-only</h4>
-                                <p>No sub-agent can write to the database, execute trades, or call external APIs beyond their assigned data sources. The orchestrator is also read-only. Only AutoTradeEngine can trigger real transactions — and only after the full advice pipeline completes.</p>
-                            </div>
-                        </div>
+                        <h2 class="section-heading">Architecture</h2>
+                        <ul>
+                            <li><strong>Multi-Agent Orchestrator:</strong> The orchestrator runs three specialized sub-agents (Technical, Sentiment, Risk) in parallel using Python <code>asyncio.gather</code> for speed and determinism.</li>
+                            <li><strong>TechnicalAgent:</strong> Pure Python. Analyzes market signals (momentum, volume) and price action from Neon DB.</li>
+                            <li><strong>SentimentAgent:</strong> Calls Groq/Tavily for news and social sentiment, wrapping all external text in XML tags to prevent prompt injection. Produces a sentiment score (1–10) and flags viral narratives.</li>
+                            <li><strong>RiskAgent:</strong> Pure Python. Fetches live wallet balance and open positions from Intern 2’s endpoint, never from stale DB data. Assesses user risk, max position size, and exposure.</li>
+                            <li><strong>SynthesisAgent:</strong> LLM (Groq/Ollama/Claude) receives all sub-agent outputs and market data, then produces structured JSON advice (summary, trending reason, risk factors, suggested plan, confidence, and position sizing for premium calls). Never executes trades or fetches data directly.</li>
+                        </ul>
                     </section>
 
                     <section class="docs-section" id="item-5-2">
-                        <h2 class="section-heading">Conversation Memory</h2>
-                        <p>In v1, every advice call was stateless — the AI had no memory of previous questions from the same user about the same market. v2 introduces a <code>Conversation</code> table in Neon that stores multi-turn message history per user per market.</p>
-                        <p>When a user asks a follow-up question after receiving advice, the full conversation thread is injected into the prompt as context. The AI responds coherently within the existing discussion — it remembers what it said before, what the user asked, and the market's state at the time.</p>
+                        <h2 class="section-heading">Personalization & Memory</h2>
+                        <ul>
+                            <li><strong>Sliding Window Memory:</strong> The AI Agent loads the last 5 messages per user and market from Neon DB, injecting them into the prompt for context. This enables multi-turn conversations and follow-up questions, while keeping the system stateless and scalable.</li>
+                            <li><strong>User Profile:</strong> Language preference, permissions, and trading limits are fetched fresh from Neon DB on every request. No in-memory user state is kept, ensuring scalability and up-to-date personalization.</li>
+                        </ul>
                         <h5>How conversation sessions work:</h5>
                         <ul>
                             <li><code>/advice market-001</code> — starts a new conversation, stores a <code>conversation_id</code></li>
@@ -398,9 +378,11 @@
                     </section>
 
                     <section class="docs-section" id="item-5-3">
-                        <h2 class="section-heading">Kiswahili Support</h2>
-                        <p>The entire bot experience — market summaries, advice output, trade confirmations, and error messages — can be delivered in Kiswahili. Users switch language via <code>/language sw</code> and switch back with <code>/language en</code>. The preference is stored in their user record and persists across sessions.</p>
-                        <p>Language selection affects the AI prompt templates and bot response formatting. The underlying market data and signal scores remain in English internally — only the user-facing text is translated. This means all numerical data is always accurate regardless of language setting.</p>
+                        <h2 class="section-heading">Language Support</h2>
+                        <ul>
+                            <li><strong>Kiswahili & English:</strong> The entire bot and dashboard experience, including advice, confirmations, and errors, can be delivered in Kiswahili or English. Users switch language via <code>/language sw</code> or <code>/language en</code>. The preference is stored in Neon DB and affects all AI prompts and responses.</li>
+                            <li><strong>Accurate Data:</strong> All numerical and market data remains in English internally; only user-facing text is translated, ensuring accuracy regardless of language.</li>
+                        </ul>
                     </section>
                 </article>
 
