@@ -16,6 +16,36 @@
 </head>
 
 <body class="docs-page">
+
+    <!-- ── v2 Password Modal ── -->
+    <div id="nort-v2-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(5,12,28,0.85);backdrop-filter:blur(10px);align-items:center;justify-content:center;">
+        <div style="background:rgba(10,22,40,0.98);border:1px solid rgba(45,212,191,0.35);border-radius:16px;padding:36px 32px;width:100%;max-width:380px;margin:auto;box-shadow:0 24px 80px rgba(0,0,0,0.7);position:relative;">
+            <button id="nort-v2-modal-close" style="position:absolute;top:14px;right:16px;background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;line-height:1;">&#x2715;</button>
+            <div style="text-align:center;margin-bottom:24px;">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.3);margin-bottom:14px;">
+                    <i class="fas fa-lock" style="color:#60A5FA;font-size:1.1rem;"></i>
+                </span>
+                <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:0.03em;">v2.0 · On-Chain Trading</div>
+                <div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:rgba(180,210,240,0.55);margin-top:6px;">Enter access password to continue</div>
+            </div>
+            <div style="position:relative;margin-bottom:14px;">
+                <input id="nort-v2-pw-input" type="password" placeholder="Access password" autocomplete="off"
+                    style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 44px 12px 14px;color:#fff;font-family:'DM Mono',monospace;font-size:0.88rem;outline:none;transition:border-color 0.2s;">
+                <button id="nort-v2-pw-toggle" type="button"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.35);cursor:pointer;font-size:14px;padding:0;">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            <div id="nort-v2-pw-error" style="display:none;font-family:'DM Mono',monospace;font-size:0.75rem;color:#F87171;margin-bottom:12px;padding:8px 12px;background:rgba(248,113,113,0.08);border-radius:8px;border:1px solid rgba(248,113,113,0.2);">
+                <i class="fas fa-times-circle me-1"></i> Incorrect password. Please try again.
+            </div>
+            <button id="nort-v2-pw-submit"
+                style="width:100%;background:linear-gradient(135deg,rgba(45,212,191,0.2),rgba(96,165,250,0.2));border:1px solid rgba(45,212,191,0.4);border-radius:10px;padding:12px;color:#fff;font-family:'DM Mono',monospace;font-size:0.88rem;cursor:pointer;transition:all 0.2s;letter-spacing:0.03em;">
+                <i class="fas fa-unlock me-2" style="color:#2DD4BF;"></i>Unlock v2 Docs
+            </button>
+        </div>
+    </div>
+
     <header class="header fixed-top">
         <div class="branding docs-branding">
             <div class="docs-navbar-inner">
@@ -59,9 +89,9 @@
                             <li><hr class="dropdown-divider docs-version-divider"></li>
                             <li>
                                 <a class="dropdown-item docs-version-item docs-v2-item" href="#">
-                                    <span class="docs-version-item-dot"></span>
-                                    <span class="docs-version-item-name">v2.0 · Copy Trading</span>
-                                    <span class="docs-version-badge soon">Soon</span>
+                                    <span class="docs-version-item-dot" style="background:#60A5FA;box-shadow:0 0 5px #60A5FA;"></span>
+                                    <span class="docs-version-item-name">v2.0 · On-Chain Trading</span>
+                                    <span class="docs-version-badge" style="background:rgba(96,165,250,0.12);color:#60A5FA;border-color:rgba(96,165,250,0.3);"><i class="fas fa-lock" style="font-size:0.6rem;"></i></span>
                                 </a>
                             </li>
                         </ul>
@@ -1060,17 +1090,66 @@
     <script src="assets/plugins/gumshoe/gumshoe.polyfills.min.js"></script>
     <script src="assets/js/docs.js"></script>
     <script>
-        document.querySelector('.docs-v2-item').addEventListener('click', function(e) {
-            e.preventDefault(); e.stopPropagation();
-            var existing = document.getElementById('nort-coming-soon-toast');
-            if (existing) existing.remove();
-            var toast = document.createElement('div');
-            toast.id = 'nort-coming-soon-toast';
-            toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:rgba(10,22,40,0.97);border:1px solid rgba(45,212,191,0.4);border-radius:12px;padding:14px 24px;z-index:99999;color:#fff;font-family:"DM Mono",monospace;font-size:0.82rem;box-shadow:0 8px 32px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px;backdrop-filter:blur(16px);transition:opacity 0.4s';
-            toast.innerHTML = '<span style="color:#2DD4BF;font-size:1rem;">⏳</span> v2.0 On-Chain Trading — <strong style="color:#2DD4BF;">Coming Soon</strong>';
-            document.body.appendChild(toast);
-            setTimeout(function() { toast.style.opacity = '0'; setTimeout(function() { toast.remove(); }, 400); }, 2800);
-        });
+        // ── v2 Password Gate ──
+        (function() {
+            const V2_DEST = 'docs-page-v2.html';
+            const modal   = document.getElementById('nort-v2-modal');
+            const closeBtn= document.getElementById('nort-v2-modal-close');
+            const input   = document.getElementById('nort-v2-pw-input');
+            const submit  = document.getElementById('nort-v2-pw-submit');
+            const errEl   = document.getElementById('nort-v2-pw-error');
+            const toggle  = document.getElementById('nort-v2-pw-toggle');
+
+            function openModal() {
+                input.value = '';
+                errEl.style.display = 'none';
+                modal.style.display = 'flex';
+                setTimeout(function(){ input.focus(); }, 80);
+            }
+            function closeModal() { modal.style.display = 'none'; }
+
+            document.querySelector('.docs-v2-item').addEventListener('click', function(e) {
+                e.preventDefault(); e.stopPropagation();
+                var dd = bootstrap.Dropdown.getInstance(document.getElementById('docsVersionBtn'));
+                if (dd) dd.hide();
+                openModal();
+            });
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+
+            toggle.addEventListener('click', function() {
+                var shown = input.type === 'text';
+                input.type = shown ? 'password' : 'text';
+                toggle.querySelector('i').className = shown ? 'fas fa-eye' : 'fas fa-eye-slash';
+            });
+
+            async function checkPassword() {
+                var entered = input.value;
+                var correct = false;
+                try {
+                    var res  = await fetch('passwords.json?_=' + Date.now());
+                    var data = await res.json();
+                    correct  = (entered === data.v2);
+                } catch(e) { correct = false; }
+                if (correct) {
+                    sessionStorage.setItem('nort_v2_access', 'true');
+                    closeModal();
+                    window.location.href = V2_DEST;
+                } else {
+                    errEl.style.display = 'block';
+                    input.style.borderColor = 'rgba(248,113,113,0.6)';
+                    input.focus();
+                    setTimeout(function(){ input.style.borderColor = 'rgba(255,255,255,0.12)'; }, 1800);
+                }
+            }
+
+            submit.addEventListener('click', checkPassword);
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') checkPassword();
+                if (e.key === 'Escape') closeModal();
+            });
+        })();
     </script>
 </body>
 </html>

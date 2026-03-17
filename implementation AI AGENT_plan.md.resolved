@@ -1,0 +1,273 @@
+# NORT Phase Two — Full Hackathon Architecture Plan
+
+> **Hackathon**: Base Batches | **Network**: Base (testnet → mainnet)
+> **AI Agent Intern Scope**: `services/agent/` + `services/backend/api/advice.py`
+
+---
+
+## ⚠️ Critical Architecture Fact: Base vs Polymarket
+
+> [!IMPORTANT]
+> Polymarket runs on **Polygon**, not Base. This is a fundamental constraint.
+> Your options:
+> - **Bridge approach**: User holds USDC on Base → bridge to Polygon to execute on real Polymarket
+> - **Parallel prediction market on Base**: Use Polymarket data for prices/markets, but settle trades through a custom Base smart contract (simulated Polymarket on-chain)
+> - **Recommended for hackathon**: Use Base for wallet + payments + settlement receipt; route actual Polymarket trades via their CLOB API on Polygon. The "on Base" story is the wallet and payment layer.
+
+---
+
+## Complete System Architecture (All Interns)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      USER INTERFACES                        │
+│   Telegram Bot (Nort)              Next.js Dashboard        │
+└───────────────┬─────────────────────────┬───────────────────┘
+                │                         │
+                ▼                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    FASTAPI BACKEND (Render)                  │
+│  /agent/advice   /papertrade   /trade/real   /wallet        │
+│  /x402/verify    /copytrading  /permissions  /conversation  │
+└──────┬───────────────┬──────────────────┬───────────────────┘
+       │               │                  │
+       ▼               ▼                  ▼
+┌──────────┐   ┌──────────────┐   ┌──────────────────────┐
+│  Neon DB │   │  OpenRouter  │   │  Base Network (EVM)  │
+│ (Postgres│   │ Claude/OSS   │   │  Smart Wallet        │
+│  cloud)  │   │  via Tavily  │   │  USDC on Base        │
+└──────────┘   └──────────────┘   └──────────────────────┘
+                                           │
+                                   MPesa On-Ramp
+                                   (Transak/MoonPay)
+```
+
+---
+
+## The Money Flow — How It All Connects
+
+```
+User loads wallet:
+  MPesa/Card → On-ramp Service (Transak) → USDC on Base → User's Smart Wallet
+
+User pays for premium advice:
+  User's Base Wallet → x402 micro-payment (USDC) → Backend verifies → Premium unlocked
+
+User executes real trade:
+  User's Base Wallet → (bridge if needed) → Polymarket CLOB on Polygon
+  ↑ Agent generates advice → AutoTradeEngine sends tx → No custody (funds go direct)
+
+User paper trades:
+  No money moves → Trade logged in Neon only
+```
+
+> [!NOTE]
+> **No custody**: NORT never holds user funds. The smart wallet is the user's own on-chain wallet. When AutoTradeEngine executes, it constructs and signs a transaction from the user's wallet directly to Polymarket. NORT is just the interface.
+
+---
+
+## Feature Breakdown by Owner
+
+### 🔵 NOT Your Problem (Other Interns)
+| Feature | Owner | What It Does |
+|---|---|---|
+| Smart Wallet per user | Blockchain Intern | Deploy a Coinbase Smart Wallet (or Privy) per Telegram user on Base |
+| MPesa on-ramp | Payments Intern | Transak/MoonPay API → deposit USDC into user's smart wallet |
+| x402 verification | Backend Intern | Verify payment proof in `POST /x402/verify` |
+| Base smart contract | Blockchain Intern | On-chain receipt of trade execution on Base testnet |
+| Polymarket CLOB API | Backend Intern | `POST /trade/real` calls Polymarket's signed order API on Polygon |
+| Copy trading engine | Backend Intern | When leader trades → fan out to all followers in DB |
+| Dashboard wallet UI | Dashboard Intern | Show on-chain balance, tx history, paper/real toggle |
+
+---
+
+### 🟠 Your Problem (AI Agent Intern)
+
+These are the features where the advice pipeline changes:
+
+#### 1. Further Prompting (Conversation Memory) ← NEW
+Users currently get one-shot advice. They want to ask follow-ups:
+- *"What if BTC drops 10% first?"*
+- *"Is there a better market to trade instead?"*
+- *"Explain the risk factors more"*
+
+**How**: Add a `conversation_id` to every advice session. Store message history in a new `Conversation` table in Neon:
+
+```
+Conversation(id, user_id, market_id, messages: JSONB, created_at)
+```
+
+Each message stores `{role: user|assistant, content, timestamp}`. On each new message, the full history is injected into the prompt as context. The LLM sees the full thread and responds coherently.
+
+**Telegram flow**:
+```
+/advice market-001           → starts a conversation, stores conversation_id
+"What if BTC drops first?"   → bot detects follow-up, loads history, sends thread to LLM
+/newadvice                   → clears context, starts fresh
+```
+
+**Important**: Conversations are capped (last 10 exchanges maximum) to control token costs.
+
+---
+
+#### 2. Paper / Real Trade Toggle ← AFFECTS YOU
+The AutoTradeEngine you build needs to know which mode to use.
+
+User sets mode via `/mode paper` or `/mode real`. Stored in `UserPermission.trade_mode`.
+
+**Your AutoTradeEngine logic:**
+```python
+if permission.trade_mode == "paper":
+    POST /papertrade   # logs in Neon, no money moves
+
+if permission.trade_mode == "real":
+    POST /trade/real   # calls Polymarket CLOB via blockchain intern's route
+                       # requires wallet_address + signature from user's smart wallet
+```
+
+You do **not** build the `/trade/real` route — you just call it. The blockchain intern owns that.
+
+---
+
+#### 3. Auto-Trade Execution (Real Money) ← AFFECTS YOU
+When AutoTradeEngine fires for a real trade:
+- It calls the blockchain intern's endpoint
+- That endpoint constructs an EIP-712 signed order for Polymarket's CLOB
+- Signs it from the user's smart wallet (the wallet key is managed by the smart wallet infrastructure, not by you)
+- No funds touch your backend
+
+Your AutoTradeEngine just sends:
+```python
+POST /trade/real {
+    market_id, outcome, amount_usdc,
+    wallet_address,
+    advice_id  ← idempotency key
+}
+```
+
+**Safeguards you own**:
+- Idempotency key (prevents double-execution)
+- Confidence threshold check (min 0.75 before auto-trade)
+- Bet size limiter (max from UserPermission)
+- Mode check (paper vs real)
+
+---
+
+#### 4. Copy Trading ← PARTIALLY AFFECTS YOU
+When a user is set as a **leader** (copy source):
+- Their advice sessions are marked `is_leader: true`
+- When AutoTradeEngine fires for a leader, backend fans out copies to all followers
+
+**What you own**: Nothing in the fan-out logic. BUT the advice quality matters more here because bad leader advice gets multiplied across all followers. Your confidence threshold becomes critical:
+
+> **Recommended**: Copy trades only execute if `confidence >= 0.80` (stricter than solo threshold of 0.75)
+
+---
+
+#### 5. x402 Premium Advice ← MINOR CHANGE
+Currently `premium=True` just adds a "deeper analysis" line to the prompt. In phase two:
+- Backend verifies the x402 payment proof before calling your endpoint
+- Your endpoint receives `premium=True`
+- You activate SynthesisAgent's extended mode: longer context window, all 3 sub-agents required (not optional), position sizing guidance enabled
+
+No x402 code changes needed on your side — backend intern owns verification.
+
+---
+
+#### 6. Wallet Context in Advice ← NEW DATA SOURCE
+The user's on-chain wallet (real USDC balance) should now feed into RiskAgent:
+```
+RiskAgent sees:
+  - Paper balance (from Neon)
+  - Real on-chain USDC balance (from smart wallet via blockchain intern's /wallet/balance route)
+  - Open real positions (from Polymarket CLOB)
+```
+
+This makes advice much more grounded — "You have $120 USDC real balance and $50 already on market X, so max safe bet here is $30."
+
+---
+
+## Scalability — Concurrent Users & Multi-Tenancy
+
+### The problem
+`search_prefetch()` takes ~5-8 seconds (3 Tavily calls). `call_openclaw()` takes ~10-15 seconds. For 100 concurrent users, naive synchronous handling would queue up.
+
+### Your solution: Already mostly done
+FastAPI + `async`/`await` + `asyncio.gather()` means your current code handles concurrent requests well. Each request is non-blocking. Render auto-scales horizontally by spinning up more instances.
+
+### What multi-tenancy means for you
+
+| Tenant concern | How you handle it |
+|---|---|
+| User A's advice leaks to User B | Never. Each call fetches its own data. No shared in-memory state. |
+| User A's conversation history | Stored in Neon under their `user_id`. Never cross-referenced. |
+| Rate limiting | Per `telegram_id`, tracked in Neon. Each instance checks the same DB. |
+| Idempotency | Idempotency keys stored in Neon. Any instance checks before executing. |
+
+> [!TIP]
+> Add **Neon connection pooling** (`pgbouncer` mode — Neon supports this natively). At 100+ concurrent users, raw connections exhaust fast. Pooling fixes this with zero code changes — just update the connection string.
+
+### Token cost at scale
+At 100 daily active users, each running 3 advice calls:
+- Tavily: 300 × 15 searches ≈ 4,500 API calls/day (check tier limits)
+- Claude 3 Haiku: ~$0.001 per call × 300 calls ≈ $0.30/day (very cheap)
+- Premium advice (x402) gates the expensive model calls → self-funding
+
+---
+
+## Revised AI Agent Intern — Full Feature List
+
+| Feature | Complexity | Week |
+|---|---|---|
+| Deeper context (Polymarket history, cross-market odds) | Medium | 1 |
+| Prompt control policies | Low | 1 |
+| Kiswahili support | Medium | 1 |
+| Conversation memory (further prompting) | Medium | 1 |
+| Multi-agent orchestrator (Sentiment + Risk + Technical) | High | 2 |
+| Open-source model routing (Ollama/Groq) | Low | 2 |
+| Agent security (sanitization, rate limiting, audit log) | Medium | 2 |
+| Paper/Real mode toggle in AutoTradeEngine | Low | 2 |
+| Auto-trade execution (with confidence + idempotency) | High | 2 |
+| Copy trade confidence threshold | Low | 2 |
+| On-chain wallet balance in RiskAgent | Low | 2 |
+
+---
+
+## Copy Trading — How It Works
+
+```
+Leader User (e.g. @alice)
+    → /advice market-001
+    → AutoTradeEngine fires (confidence 0.88 ≥ 0.80 leader threshold)
+    → POST /trade/real {market_id, outcome: YES, amount: 40}
+    → ✅ Trade executes
+
+Backend Copy Fan-out (NOT your code):
+    → SELECT followers WHERE leader_id = alice.id
+    → FOR each follower:
+          POST /trade/real {
+              market_id, outcome: YES,
+              amount: follower.copy_size_usdc,
+              wallet_address: follower.wallet
+          }
+    → Each follower gets notified: "🔁 Copied @alice's trade: YES on market-001"
+```
+
+**Your role in copy trading**: Just ensure the advice and AutoTradeEngine output is clean and structured. The fan-out is backend/blockchain intern territory.
+
+---
+
+## Hackathon Demo Script (Base Batches)
+
+```
+1. User loads wallet via MPesa → USDC appears in Telegram wallet
+2. /advice market-001 → shows structured AI advice with confidence 0.82
+3. User asks follow-up "What if odds drop to 60%?" → agent responds in context
+4. /enable_autotrade → user sets auto-trade, $30 limit, confidence 0.75
+5. /advice triggers → AutoTradeEngine fires → real USDC trade on Polymarket
+6. Dashboard shows on-chain tx hash as proof
+7. /premium_advice → locked, user pays $0.10 USDC via x402 → unlocks
+8. /language sw → repeat in Kiswahili
+```
+
+This tells a complete Base-native story: **wallet on Base → pay via x402 on Base → agent executes real trade → receipt on-chain**.
