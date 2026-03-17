@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        if (sessionStorage.getItem('nort_v2_access') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
     <title>NORT v2 — Full Documentation</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -26,22 +31,30 @@
                         <a class="navbar-brand" href="index.html"><span class="logo-text">NORT</span></a>
                     </div>
                 </div>
-                <div class="docs-top-utilities d-flex justify-content-end align-items-center">
-                    <div class="top-search-box d-none d-lg-flex">
-                        <form class="search-form">
-                            <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">
-                            <button type="submit" class="btn search-btn" value="Search"><i class="fas fa-search"></i></button>
-                        </form>
+                <div class="docs-navbar-right" style="margin-left:auto;">
+                    <div class="dropdown" id="docs-version-dropdown">
+                        <button class="btn docs-version-btn d-flex align-items-center gap-2" id="docsVersionBtn" data-bs-toggle="dropdown" aria-expanded="false" style="background:rgba(255,255,255,0.07);border:1px solid rgba(96,165,250,0.4);border-radius:20px;padding:6px 14px;color:#fff;font-size:0.8rem;font-family:'DM Mono',monospace;">
+                            <span class="docs-version-dot" style="background:#60A5FA;box-shadow:0 0 6px #60A5FA;"></span>
+                            <span>v2.0 · On-Chain Trading</span>
+                            <i class="fas fa-chevron-down docs-version-chevron"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end docs-version-menu" aria-labelledby="docsVersionBtn" style="background:rgba(10,22,40,0.97);border:1px solid rgba(45,212,191,0.25);border-radius:10px;min-width:220px;padding:8px;margin-top:10px;">
+                            <li>
+                                <a class="dropdown-item docs-version-item" href="docs-page.html" style="color:rgba(255,255,255,0.65);border-radius:7px;padding:9px 12px;font-size:0.82rem;font-family:'DM Mono',monospace;">
+                                    <span class="docs-version-item-dot" style="background:#2DD4BF;box-shadow:0 0 6px #2DD4BF;flex-shrink:0;"></span>
+                                    <span class="docs-version-item-name">v1.0 · Paper Trading</span>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider docs-version-divider" style="border-color:rgba(255,255,255,0.1);margin:4px 0;"></li>
+                            <li>
+                                <a class="dropdown-item docs-version-item active-version" href="docs-page-v2.html" style="color:#fff;border-radius:7px;padding:9px 12px;font-size:0.82rem;font-family:'DM Mono',monospace;background:rgba(255,255,255,0.04);">
+                                    <span class="docs-version-item-dot active" style="background:#60A5FA;box-shadow:0 0 6px #60A5FA;flex-shrink:0;"></span>
+                                    <span class="docs-version-item-name">v2.0 · On-Chain Trading</span>
+                                    <span class="docs-version-badge current" style="margin-left:auto;font-size:0.7rem;color:#60A5FA;opacity:0.9;">Current</span>
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                    <span class="nort-live d-none d-lg-inline-flex mx-4">
-                        <span class="nort-live-dot"></span>v2.0 · Real Trading
-                    </span>
-                    <ul class="social-list list-inline mx-md-3 mb-0 d-none d-lg-flex">
-                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-github fa-fw"></i></a></li>
-                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-x-twitter fa-fw"></i></a></li>
-                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-telegram fa-fw"></i></a></li>
-                    </ul>
-                    <a href="index-v2.html" class="btn btn-primary d-none d-lg-flex">← Home</a>
                 </div>
             </div>
         </div>
