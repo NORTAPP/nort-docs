@@ -1,0 +1,270 @@
+# x402 Payment Protocol — Deep Dive
+
+> **Context**: x402 is used to gate premium AI advice in NORT. Users pay per query, not via subscription.
+> Payments happen entirely on **Base** — no bridging involved.
+
+---
+
+## What x402 Is
+
+x402 is an **HTTP-native micro-payment standard** inspired by the HTTP 402 "Payment Required" status code. The idea: instead of monthly subscriptions or API keys, a server can demand a small crypto payment for a specific resource, and the client proves payment in a single HTTP header.
+
+```
+Normal HTTP:
+  Client → GET /premium-advice → Server → 200 OK + data
+
+x402 HTTP:
+  Client → GET /premium-advice → Server → 402 Payment Required
+                                          {amount: "0.10", token: "USDC", chain: "base"}
+  Client → pays on-chain
+  Client → GET /premium-advice
+           X-Payment: <proof>   → Server → verifies proof → 200 OK + data
+```
+
+The key property: **no subscription, no auth tokens, no account management**. One payment = one use of the resource.
+
+---
+
+## Two Separate x402 Flows in NORT
+
+```
+Flow A — Premium Advice Gate
+  User wants /premium_advice
+  → Bot tells them to pay $0.10 USDC on Base
+  → User sends on-chain tx from their Base smart wallet
+  → User sends /pay <tx_hash> to bot
+  → Backend verifies tx_hash on Base
+  → Premium advice unlocked for this market
+
+Flow B — Wallet-Integrated (Advanced)
+  x402-compatible client (e.g. Coinbase AgentKit)
+  → Client auto-attaches payment header to request
+  → Server validates inline — no /pay step needed
+  → Fully automated, no user interaction
+```
+
+**For the hackathon**: Implement Flow A first (manual proof). Flow B is stretch goal.
+
+---
+
+## Flow A — Step by Step (Manual Proof via Telegram)
+
+### Step 1: User requests premium advice
+```
+User: /premium_advice market-001
+
+Bot checks Neon Payment table:
+  SELECT * FROM payment WHERE user_id = X AND market_id = Y AND is_confirmed = true
+  → No record found
+
+Bot replies:
+  "🔒 Premium advice costs $0.10 USDC.
+   Send from your Base wallet to: 0xNORT_TREASURY_ADDRESS
+   Then send proof with: /pay <tx_hash>"
+```
+
+### Step 2: User pays on-chain
+```
+User opens Telegram wallet (or Coinbase Wallet)
+→ Sends 0.10 USDC on Base to 0xNORT_TREASURY_ADDRESS
+→ Receives tx_hash from their wallet: 0xabc123...
+→ Sends to bot: /pay 0xabc123...
+```
+
+### Step 3: Backend verifies the transaction
+```python
+# services/backend/core/x402_verifier.py
+
+import httpx
+from web3 import Web3
+
+NORT_TREASURY = os.getenv("NORT_TREASURY_ADDRESS")
+USDC_BASE     = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+REQUIRED_AMOUNT = 100000  # 0.10 USDC (6 decimals)
+BASE_RPC = os.getenv("BASE_RPC_URL", "https://mainnet.base.org")
+
+w3 = Web3(Web3.HTTPProvider(BASE_RPC))
+
+async def verify_x402_payment(tx_hash: str, user_id: str) -> dict:
+    # 1. Fetch transaction receipt from Base
+    receipt = w3.eth.get_transaction_receipt(tx_hash)
+    if not receipt or receipt.status != 1:
+        return {"verified": False, "reason": "Transaction failed or not found"}
+
+    # 2. Parse ERC-20 Transfer event from USDC contract
+    transfer_topic = w3.keccak(text="Transfer(address,address,uint256)")
+    usdc_logs = [
+        log for log in receipt.logs
+        if log.address.lower() == USDC_BASE.lower()
+        and log.topics[0] == transfer_topic
+    ]
+    if not usdc_logs:
+        return {"verified": False, "reason": "No USDC transfer in this tx"}
+
+    log = usdc_logs[0]
+    recipient = "0x" + log.topics[2].hex()[-40:]
+    amount    = int(log.data.hex(), 16)
+
+    # 3. Validate recipient and amount
+    if recipient.lower() != NORT_TREASURY.lower():
+        return {"verified": False, "reason": "Payment sent to wrong address"}
+    if amount < REQUIRED_AMOUNT:
+        return {"verified": False, "reason": f"Underpaid: got {amount}, need {REQUIRED_AMOUNT}"}
+
+    # 4. Replay attack check — has this tx_hash been used before?
+    with Session(engine) as session:
+        existing = session.exec(
+            select(Payment).where(Payment.tx_hash == tx_hash)
+        ).first()
+        if existing:
+            return {"verified": False, "reason": "Proof already used"}
+
+    # 5. Store receipt in Neon
+    with Session(engine) as session:
+        payment = Payment(
+            user_id=user_id,
+            tx_hash=tx_hash,
+            amount=amount / 1e6,
+            is_confirmed=True,
+            confirmed_at=datetime.utcnow(),
+        )
+        session.add(payment)
+        session.commit()
+
+    return {"verified": True}
+```
+
+### Step 4: Premium advice unlocked
+```python
+# services/backend/api/advice.py
+
+@router.post("/agent/advice")
+async def get_advice(request: AdviceRequest):
+    if request.premium:
+        # Check payment exists for this user
+        with Session(engine) as session:
+            payment = session.exec(
+                select(Payment)
+                .where(Payment.user_id == request.telegram_id)
+                .where(Payment.is_confirmed == True)
+            ).first()
+        if not payment:
+            raise HTTPException(403, "Premium not unlocked. Use /pay <tx_hash>")
+
+    # ... rest of advice flow
+```
+
+---
+
+## Flow B — Automated x402 (Stretch Goal)
+
+For fully automated agents (like Coinbase AgentKit), the payment can be attached directly to the HTTP request without user interaction.
+
+```python
+# How an automated x402 client works
+
+# Server returns 402 with payment details
+# Client attaches payment proof in X-Payment header
+
+headers = {
+    "X-Payment": json.dumps({
+        "scheme": "exact",
+        "network": "base-mainnet",
+        "payload": {
+            "signature": "0x...",      # EIP-712 signed payment authorization
+            "authorization": {
+                "from": user_wallet,
+                "to": NORT_TREASURY,
+                "value": "100000",    # 0.10 USDC in 6 decimals
+                "validUntil": timestamp + 300  # expires in 5 minutes
+            }
+        }
+    })
+}
+response = requests.post("/agent/premium_advice", headers=headers, json=body)
+```
+
+**Server-side verification for Flow B:**
+- Decode the EIP-712 signature
+- Recover the signer address
+- Match against the user's registered wallet
+- Check `validUntil` has not passed
+- Check amount >= required
+- Check not replayed (store signature hash in Neon)
+
+**Libraries**: `eth_account` (Python), `viem` (TypeScript), `@coinbase/cdp-agentkit-core` (AgentKit integration)
+
+---
+
+## Payment Table in Neon
+
+```python
+class Payment(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: str           # FK → User.telegram_id
+    market_id: Optional[str] = None  # which market was unlocked (can be null for global)
+    tx_hash: str           # on-chain tx hash — UNIQUE (replay protection)
+    amount: float          # USDC amount confirmed
+    is_confirmed: bool = False
+    confirmed_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None  # optional: premium expires after 24h
+```
+
+---
+
+## Edge Cases & Security
+
+| Case | How to Handle |
+|---|---|
+| **Replay attack** | `tx_hash` is UNIQUE in Neon. Second use returns "Proof already used" |
+| **Underpayment** | Check `amount >= REQUIRED_AMOUNT` in verifier. Reject if short. |
+| **Wrong recipient** | Verify `to` address matches `NORT_TREASURY_ADDRESS` exactly |
+| **Failed tx** | Check `receipt.status == 1`. A failed tx still has a hash. |
+| **Stale tx** | Check `block_timestamp` — reject proofs older than 10 minutes |
+| **Double request** | Idempotent: verify stores in Neon, second `/verify` call finds existing record and returns verified=True without re-storing |
+| **User shares proof** | Proof is tied to `user_id` — another user's claim with same hash is rejected |
+
+---
+
+## How x402 Interacts with the Bridge
+
+```
+User's Base Wallet (USDC on Base)
+         │
+         ├── [x402] $0.10 → NORT Treasury (Base)     ← stays on Base, instant
+         │
+         └── [LI.FI Bridge] $50 → Polygon Wallet     ← crosses to Polygon, ~2 min
+                                        │
+                                        └── Polymarket trade
+```
+
+**These are completely independent flows.** x402 never touches the bridge. The bridge never touches x402. A user could:
+- Pay x402 and never trade (advice only)
+- Trade without paying x402 (free advice + auto-trade)
+- Do both in the same session
+
+---
+
+## Premium Tiers (Optional Extension)
+
+If you want multiple price points:
+
+| Command | Cost | What Unlocks |
+|---|---|---|
+| `/advice` | Free | Basic AI analysis |
+| `/premium_advice` | $0.10 USDC | Full sub-agent analysis + position sizing |
+| `/deep_advice` | $0.25 USDC | Premium + 7-day market scan + copy trade signal |
+
+The verifier checks `payment.amount >= tier_required_amount` for the tier being requested.
+
+---
+
+## Testnet Setup Checklist
+
+- [ ] Deploy `NORT_TREASURY_ADDRESS` on Base Sepolia (simple EOA wallet is fine for hackathon)
+- [ ] Set `BASE_RPC_URL=https://sepolia.base.org` in `.env`
+- [ ] Set `USDC_BASE=0x036CbD53842c5426634e7929541eC2318f3dCF7e` (Base Sepolia USDC)
+- [ ] Set `REQUIRED_AMOUNT=100000` (0.10 USDC)
+- [ ] Get test USDC from Circle faucet: [faucet.circle.com](https://faucet.circle.com)
+- [ ] Add `tx_hash` UNIQUE constraint to Payment table in Neon
+- [ ] Test replay attack: submit same tx_hash twice — second should fail

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>NORT v2 — Full Documentation</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="NORT v2 — Real Trading, x402 Payments, Base Smart Wallets, Multi-Agent AI">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script defer src="assets/fontawesome/js/all.min.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.2/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="assets/plugins/simplelightbox/simple-lightbox.min.css">
+    <link id="theme-style" rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/nort-theme.css">
+</head>
+<body class="docs-page">
+    <header class="header fixed-top">
+        <div class="branding docs-branding">
+            <div class="container-fluid position-relative py-2">
+                <div class="docs-logo-wrapper">
+                    <button id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible me-2 d-xl-none" type="button">
+                        <span></span><span></span><span></span>
+                    </button>
+                    <div class="site-logo">
+                        <a class="navbar-brand" href="index.html"><span class="logo-text">NORT</span></a>
+                    </div>
+                </div>
+                <div class="docs-top-utilities d-flex justify-content-end align-items-center">
+                    <div class="top-search-box d-none d-lg-flex">
+                        <form class="search-form">
+                            <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">
+                            <button type="submit" class="btn search-btn" value="Search"><i class="fas fa-search"></i></button>
+                        </form>
+                    </div>
+                    <span class="nort-live d-none d-lg-inline-flex mx-4">
+                        <span class="nort-live-dot"></span>v2.0 · Real Trading
+                    </span>
+                    <ul class="social-list list-inline mx-md-3 mb-0 d-none d-lg-flex">
+                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-github fa-fw"></i></a></li>
+                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-x-twitter fa-fw"></i></a></li>
+                        <li class="list-inline-item"><a href="#"><i class="fa-brands fa-telegram fa-fw"></i></a></li>
+                    </ul>
+                    <a href="index-v2.html" class="btn btn-primary d-none d-lg-flex">← Home</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="docs-wrapper">
+        <div id="docs-sidebar" class="docs-sidebar">
+            <div class="top-search-box d-lg-none p-3">
+                <form class="search-form">
+                    <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">
+                    <button type="submit" class="btn search-btn" value="Search"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+            <nav id="docs-nav" class="docs-nav navbar">
+                <ul class="section-items list-unstyled nav flex-column pb-3">
+
+                    <li class="nav-item section-title"><a class="nav-link scrollto active" href="#section-1"><span class="theme-icon-holder me-2"><i class="fas fa-map-signs"></i></span>What's New in v2</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-1-1">v2 Overview</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-1-2">The Money Flow</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-1-3">Architecture Changes</a></li>
+
+                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-2"><span class="theme-icon-holder me-2"><i class="fas fa-wallet"></i></span>Base Smart Wallets</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-2-1">How Wallets Work</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-2-2">MPesa On-Ramp</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-2-3">Gas Sponsorship</a></li>
+
+                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-3"><span class="theme-icon-holder me-2"><i class="fas fa-right-left"></i></span>USDC Bridge (LI.FI)</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-3-1">Why We Bridge</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-3-2">LI.FI Route Selection</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-3-3">Bridge Fallbacks</a></li>
+
+                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-4"><span class="theme-icon-holder me-2"><i class="fas fa-lock"></i></span>x402 Payments</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-4-1">What x402 Is</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-4-2">Flow A — Manual Proof</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-4-3">Flow B — Automated</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-4-4">Security & Edge Cases</a></li>
+
+                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-5"><span class="theme-icon-holder me-2"><i class="fas fa-robot"></i></span>Multi-Agent AI</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-5-1">Sub-Agent Architecture</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-5-2">Conversation Memory</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-5-3">Kiswahili Support</a></li>
+
+                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-6"><span class="theme-icon-holder me-2"><i class="fas fa-bolt"></i></span>Auto-Trade Engine</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-6-1">How It Works</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-6-2">Safeguards</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-6-3">Paper vs Real Mode</a></li>
+
+                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-7"><span class="theme-icon-holder me-2"><i class="fas fa-copy"></i></span>Copy Trading</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-7-1">Leader &amp; Follower Model</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-7-2">Fan-Out Flow</a></li>
+
+                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-8"><span class="theme-icon-holder me-2"><i class="fas fa-box"></i></span>v2 API Reference</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-1">Real Trade Routes</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-2">x402 &amp; Wallet Routes</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-3">Conversation Routes</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-4">Permissions &amp; Copy Trading</a></li>
+
+                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-9"><span class="theme-icon-holder me-2"><i class="fas fa-lightbulb"></i></span>FAQs</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-1">Real Trading</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-2">x402 Payments</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-3">Copy Trading</a></li>
+
+                </ul>
+            </nav>
+        </div>
+
+        <div class="docs-content">
+            <div class="container">
+
+                <!-- SECTION 1 — WHAT'S NEW IN V2 -->
+                <article class="docs-article" id="section-1">
+                    <header class="docs-header">
+                        <h1 class="docs-heading">What's New in v2 <span class="docs-time">NORT v2.0</span></h1>
+                        <section class="docs-intro">
+                            <p>NORT v2 moves beyond paper trading. The core signals engine, AI advice, and dashboard from v1 remain intact — v2 adds a real-money layer on top. Users get a Base smart wallet, can fund it via MPesa or card, bridge USDC to Polygon, and execute real Polymarket trades — all from the same Telegram bot and dashboard they already use.</p>
+                        </section>
+                    </header>
+
+                    <section class="docs-section" id="item-1-1">
+                        <h2 class="section-heading">v2 Overview</h2>
+                        <p>Everything in v1 still works unchanged. v2 adds these capabilities on top:</p>
+                        <ul>
+                            <li><strong>Base Smart Wallets</strong> — Every user gets a Coinbase Smart Wallet (ERC-4337) on Base. Funded via MPesa or card through Transak. Gas is sponsored so users never manually buy ETH or MATIC.</li>
+                            <li><strong>USDC Bridge via LI.FI</strong> — USDC moves from Base to Polygon automatically before each real Polymarket trade. LI.FI selects the best route across Across, CCTP, and Stargate.</li>
+                            <li><strong>x402 Micro-Payments</strong> — Premium AI advice is gated behind a $0.10 USDC payment on Base. No subscriptions. One payment unlocks one premium advice call.</li>
+                            <li><strong>Multi-Agent AI (OpenClaw v2)</strong> — Three specialised sub-agents (Sentiment, Risk, Technical) now collaborate before producing a final structured output. Conversation memory enables multi-turn follow-up questions.</li>
+                            <li><strong>Auto-Trade Engine</strong> — When confidence clears the configured threshold, NORT can execute a real Polymarket trade directly from the user's smart wallet — no custody, fully non-custodial.</li>
+                            <li><strong>Copy Trading</strong> — Leader users' high-confidence trades are automatically mirrored to opted-in followers.</li>
+                            <li><strong>Kiswahili Language Support</strong> — The bot can switch to Kiswahili for any command using <code>/language sw</code>.</li>
+                        </ul>
+                        <div class="callout-block callout-block-warning">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-bullhorn"></i></span>Paper Mode Still Available</h4>
+                                <p>v2 does not remove paper trading. Users switch between paper and real mode via <code>/mode paper</code> or <code>/mode real</code>. Paper mode remains the default for new users.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-1-2">
+                        <h2 class="section-heading">The Money Flow</h2>
+                        <p>In v2, two separate money flows exist simultaneously. They never overlap:</p>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="theme-bg-light">x402 Payment Flow</th>
+                                        <td>User's Base wallet → $0.10 USDC → NORT Treasury wallet (also on Base). Stays entirely on Base. Instant. Unlocks one premium advice query. The bridge is never involved.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light">Trade Execution Flow</th>
+                                        <td>User's Base wallet → LI.FI bridge (~2 min) → USDC on Polygon → Polymarket CLOB signed order. NORT never holds the funds — money goes directly from user's wallet to Polymarket.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="callout-block callout-block-success">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-shield-alt"></i></span>Non-Custodial</h4>
+                                <p>NORT never holds user funds at any point. The smart wallet belongs to the user. AutoTradeEngine constructs and signs a transaction <em>from the user's wallet directly to Polymarket</em>. NORT is the interface, not the custodian.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-1-3">
+                        <h2 class="section-heading">Architecture Changes</h2>
+                        <p>The three-layer architecture from v1 is unchanged. v2 adds two new external integrations and three new backend subsystems:</p>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr><th class="theme-bg-light">New: Base Network</th><td>User smart wallets live here. x402 payments settle here. Trade receipts are anchored here as on-chain proof.</td></tr>
+                                    <tr><th class="theme-bg-light">New: LI.FI Bridge</th><td>Moves USDC from Base to Polygon before each real trade. Called by the AutoTradeEngine — invisible to the user unless they opt into notifications.</td></tr>
+                                    <tr><th class="theme-bg-light">New: Conversation Table</th><td>Stores multi-turn message history per user per market. Powers follow-up questions to OpenClaw without losing context.</td></tr>
+                                    <tr><th class="theme-bg-light">New: UserPermission Table</th><td>Stores each user's trade mode (paper/real), auto-trade toggle, max bet size, and copy trading settings.</td></tr>
+                                    <tr><th class="theme-bg-light">New: AutoTradeEngine</th><td>The backend subsystem that checks confidence, checks permissions, prevents double-execution via idempotency keys, and calls the real trade route when all conditions pass.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </article>
+
+                <!-- SECTION 2 — BASE SMART WALLETS -->
+                <article class="docs-article" id="section-2">
+                    <header class="docs-header">
+                        <h1 class="docs-heading">Base Smart Wallets</h1>
+                        <section class="docs-intro">
+                            <p>Every NORT v2 user gets a personal Coinbase Smart Wallet deployed on Base — a self-custodied ERC-4337 smart contract account. This wallet holds their USDC on Base, receives on-ramp deposits, and signs all trade transactions. NORT never controls it.</p>
+                        </section>
+                    </header>
+
+                    <section class="docs-section" id="item-2-1">
+                        <h2 class="section-heading">How Wallets Work</h2>
+                        <p>Smart wallets (ERC-4337) differ from regular Ethereum wallets in two important ways for this use case. First, they support <strong>batched transactions</strong> — multiple operations (e.g. approve USDC + call bridge) can be submitted as one atomic transaction. Second, they support <strong>Paymasters</strong>, which allow a third party (NORT's backend) to sponsor gas on behalf of the user.</p>
+                        <p>When a new user interacts with NORT v2 for the first time, a smart wallet is deployed for them on Base Sepolia (testnet) or Base mainnet. The wallet address is stored in their user record and linked to their Telegram ID. All subsequent operations — bridging, x402 payments, real trades — are signed by this wallet.</p>
+                        <div class="callout-block callout-block-info">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-info-circle"></i></span>Key Management</h4>
+                                <p>Smart wallet keys are managed by Coinbase's MPC infrastructure or by the user's own Privy embedded wallet. NORT's backend never stores or sees private keys. Signing happens client-side or via the wallet SDK.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-2-2">
+                        <h2 class="section-heading">MPesa On-Ramp</h2>
+                        <p>Users in Kenya and other MPesa markets can fund their Base smart wallet directly from their phone without a crypto exchange. The on-ramp flow is handled by <strong>Transak</strong> (or MoonPay as fallback):</p>
+                        <ul>
+                            <li>User initiates a deposit from the NORT dashboard or Telegram bot</li>
+                            <li>Transak opens an in-app or browser widget — user enters KES amount and confirms with MPesa PIN</li>
+                            <li>Transak converts KES to USDC and deposits directly to the user's Base smart wallet address</li>
+                            <li>NORT backend listens for the on-chain deposit event and updates the displayed balance</li>
+                        </ul>
+                        <p>Card payments (Visa, Mastercard) follow the same flow and deposit USDC to the same wallet address. No manual crypto transfer required in either case.</p>
+                    </section>
+
+                    <section class="docs-section" id="item-2-3">
+                        <h2 class="section-heading">Gas Sponsorship</h2>
+                        <p>A common barrier for new crypto users is needing a gas token (ETH on Base, MATIC on Polygon) before they can do anything with their USDC. NORT v2 eliminates this with Paymaster sponsorship.</p>
+                        <p>NORT's backend registers as a Paymaster on Base using <strong>Coinbase's ERC-4337 Paymaster</strong> (free on Base Sepolia during development). When a user triggers any Base transaction, the Paymaster pays the gas on their behalf. The user only needs USDC — never ETH.</p>
+                        <p>On Polygon, gas is covered by the bridge relayer (Across includes MATIC dust with USDC delivery) or by the Polymarket protocol itself for CLOB submissions.</p>
+                        <div class="callout-block callout-block-success">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-thumbs-up"></i></span>Zero gas friction</h4>
+                                <p>Users fund with KES, trade on Polymarket, and never think about ETH or MATIC. The entire gas layer is abstracted away.</p>
+                            </div>
+                        </div>
+                    </section>
+                </article>
+
+
+                <!-- SECTION 3 — USDC BRIDGE -->
+                <article class="docs-article" id="section-3">
+                    <header class="docs-header">
+                        <h1 class="docs-heading">USDC Bridge (LI.FI)</h1>
+                        <section class="docs-intro">
+                            <p>Polymarket runs on Polygon, not Base. Before any real trade can execute, the user's USDC must move from their Base wallet to Polygon. NORT v2 uses <strong>LI.FI</strong> — a bridge aggregator — to handle this automatically.</p>
+                        </section>
+                    </header>
+
+                    <section class="docs-section" id="item-3-1">
+                        <h2 class="section-heading">Why We Bridge</h2>
+                        <p>The user's wallet lives on Base. Polymarket's CLOB (Central Limit Order Book) requires <strong>native USDC on Polygon</strong> — specifically the Circle-issued token at address <code>0x3c499c...3359</code>. The two chains use different tokens even though both are called USDC. Sending the wrong token to Polymarket fails silently.</p>
+                        <p>The canonical Base bridge (Base → Ethereum L1) has a 7-day fraud proof window. That makes it unusable for live trading. LI.FI's recommended routes (Across and CCTP) both deliver <strong>native USDC</strong> on Polygon in under 2 minutes with zero slippage.</p>
+                        <div class="callout-block callout-block-danger">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-exclamation-triangle"></i></span>Never use USDC.e</h4>
+                                <p>USDC.e is the old bridged version of USDC on Polygon. Polymarket requires <strong>native USDC</strong> only. LI.FI's routes are configured to deliver native USDC — never USDC.e.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-3-2">
+                        <h2 class="section-heading">LI.FI Route Selection</h2>
+                        <p>LI.FI is not a bridge — it is a <strong>bridge aggregator</strong>. When the AutoTradeEngine needs to move USDC, it calls the LI.FI API once. LI.FI queries all available bridges simultaneously, compares them by output amount, speed, and cost, and selects the best route automatically.</p>
+                        <p>The backend calls LI.FI in two steps: first a quote (which shows the user estimated output, fee, and duration before committing), then an execute (which signs and submits the transaction from the user's Base wallet). The user can be notified of both steps or can set auto-confirm for seamless execution.</p>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr><th class="theme-bg-light">Across Protocol</th><td>Most commonly selected by LI.FI for Base → Polygon. Relayer fronts funds, user receives USDC in ~1–2 minutes. Small relayer fee (~0.1–0.2% of amount).</td></tr>
+                                    <tr><th class="theme-bg-light">CCTP (Circle)</th><td>Burns USDC on Base, mints fresh native USDC on Polygon. Zero slippage, zero bridge fee, but takes 15–20 minutes for Circle attestation. Selected when speed is less critical.</td></tr>
+                                    <tr><th class="theme-bg-light">Stargate / Others</th><td>Additional fallback routes LI.FI may select if Across is congested or unavailable. Always delivers native USDC.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-3-3">
+                        <h2 class="section-heading">Bridge Fallbacks</h2>
+                        <p>If the LI.FI API is unreachable, the AutoTradeEngine falls back to calling Across directly via its SDK. If Across is also unavailable, the trade is queued and retried — it is never silently dropped. The user receives a bot notification explaining the delay.</p>
+                        <p>Bridge transactions are idempotency-protected at the backend level. If a transaction is submitted but the receipt confirmation times out, the backend checks the on-chain state before re-submitting — preventing double bridging of the same amount.</p>
+                    </section>
+                </article>
+
+                <!-- SECTION 4 — x402 PAYMENTS -->
+                <article class="docs-article" id="section-4">
+                    <header class="docs-header">
+                        <h1 class="docs-heading">x402 Payments</h1>
+                        <section class="docs-intro">
+                            <p>x402 is an HTTP-native micro-payment standard. Instead of monthly subscriptions, users pay per premium query — $0.10 USDC on Base per call. The payment is verified on-chain before the premium advice is generated. No account management, no API keys.</p>
+                        </section>
+                    </header>
+
+                    <section class="docs-section" id="item-4-1">
+                        <h2 class="section-heading">What x402 Is</h2>
+                        <p>The name comes from HTTP status code 402 ("Payment Required"). When a user requests a premium resource, the server returns a 402 with payment instructions. The client pays on-chain and re-submits the request with proof of payment in the headers. The server verifies the proof and returns the resource.</p>
+                        <p>In NORT, this maps to: the user requests <code>/premium_advice</code>, the bot tells them to send $0.10 USDC on Base to the NORT treasury address, the user sends the transaction, and then sends the transaction hash as proof. The backend verifies the hash on-chain and unlocks the premium advice for that query.</p>
+                        <div class="callout-block callout-block-info">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-info-circle"></i></span>x402 stays on Base</h4>
+                                <p>x402 payments never cross the bridge. They settle entirely on Base — from the user's Base wallet to NORT's Base treasury. They are completely independent of the trade execution flow.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-4-2">
+                        <h2 class="section-heading">Flow A — Manual Proof (Telegram)</h2>
+                        <p>This is the primary flow for v2. It involves four steps:</p>
+                        <ul>
+                            <li><strong>Step 1:</strong> User sends <code>/premium_advice &lt;market-id&gt;</code>. Backend checks the Payment table — no confirmed payment found. Bot replies with the NORT treasury address and the required amount ($0.10 USDC on Base).</li>
+                            <li><strong>Step 2:</strong> User sends 0.10 USDC from their Base wallet to the treasury address. Their wallet returns a transaction hash.</li>
+                            <li><strong>Step 3:</strong> User sends <code>/pay &lt;tx_hash&gt;</code> to the bot. Backend calls <code>POST /x402/verify</code> with the hash and user ID.</li>
+                            <li><strong>Step 4:</strong> The verifier fetches the transaction receipt from Base, parses the USDC Transfer event, checks recipient address, checks amount, checks the hash has not been used before (replay protection), and stores the receipt in the Payment table. Premium advice is then generated and returned.</li>
+                        </ul>
+                        <div class="docs-code-block">
+                            <pre class="shadow-lg rounded"><code class="hljs">/premium_advice market-001
+→ Bot: "Send $0.10 USDC on Base to 0xNORT_TREASURY. Then /pay &lt;tx_hash&gt;"
+
+/pay 0xabc123def456...
+→ Bot: "Payment verified ✓ — generating premium advice..."
+→ [OpenClaw full analysis returned]</code></pre>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-4-3">
+                        <h2 class="section-heading">Flow B — Automated Client (Stretch Goal)</h2>
+                        <p>For fully automated integrations (such as Coinbase AgentKit or other x402-compatible clients), the payment proof can be attached directly to the HTTP request as an <code>X-Payment</code> header. The server verifies the EIP-712 signed payment authorization inline — no <code>/pay</code> command required.</p>
+                        <p>This flow is intended for programmatic access to NORT's premium advice endpoint. The client signs a payment authorization specifying the amount, recipient, and expiry timestamp. The server recovers the signer address, checks it matches the user's registered wallet, validates the amount and expiry, and verifies no replay.</p>
+                    </section>
+
+                    <section class="docs-section" id="item-4-4">
+                        <h2 class="section-heading">Security &amp; Edge Cases</h2>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr><th class="theme-bg-light">Replay attack</th><td>The <code>tx_hash</code> field is UNIQUE in the Payment table. A second submission of the same hash is immediately rejected with "Proof already used."</td></tr>
+                                    <tr><th class="theme-bg-light">Underpayment</th><td>The verifier checks <code>amount &gt;= REQUIRED_AMOUNT</code>. A payment of $0.09 is rejected even if sent to the correct address.</td></tr>
+                                    <tr><th class="theme-bg-light">Wrong recipient</th><td>The verifier parses the USDC Transfer event and checks the <code>to</code> address matches <code>NORT_TREASURY_ADDRESS</code> exactly. Payments to any other address are rejected.</td></tr>
+                                    <tr><th class="theme-bg-light">Failed transaction</th><td>The verifier checks <code>receipt.status == 1</code>. A failed transaction still has a hash — it will be rejected.</td></tr>
+                                    <tr><th class="theme-bg-light">Stale proof</th><td>The block timestamp is checked — proofs older than 10 minutes are rejected to prevent cached-proof attacks.</td></tr>
+                                    <tr><th class="theme-bg-light">User shares proof</th><td>The proof is stored against the submitting <code>user_id</code>. Another user attempting the same hash is rejected because the hash is already consumed.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </article>
+
+
+                <!-- SECTION 5 — MULTI-AGENT AI -->
+                <article class="docs-article" id="section-5">
+                    <header class="docs-header">
+                        <h1 class="docs-heading">Multi-Agent AI</h1>
+                        <section class="docs-intro">
+                            <p>OpenClaw v2 replaces the single-prompt architecture with a three-sub-agent orchestration model. Each sub-agent specialises in one dimension of analysis. Their outputs are synthesised into a single structured response by an orchestrator — giving advice that is broader, more grounded, and harder to manipulate with a poorly-worded question.</p>
+                        </section>
+                    </header>
+
+                    <section class="docs-section" id="item-5-1">
+                        <h2 class="section-heading">Sub-Agent Architecture</h2>
+                        <p>Three sub-agents run in parallel before the orchestrator assembles the final output:</p>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="theme-bg-light">Sentiment Agent</th>
+                                        <td>Analyses the three Tavily search results (news, social, context) and produces a sentiment summary — is public opinion bullish, bearish, or neutral on this outcome? Flags any viral narratives or anomalous social signals.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light">Risk Agent</th>
+                                        <td>Evaluates the user's current position (paper balance, open trades, real on-chain USDC balance if available) against the market's odds, expiry, and category. Produces a risk assessment and a recommended maximum position size for this user's current portfolio state.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light">Technical Agent</th>
+                                        <td>Analyses price momentum, volume spike data, and the composite signal score from the signals engine. Produces a technical read — is the price movement sustained or a spike, is volume confirming the move, and where are the key odds levels to watch.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light">Orchestrator (SynthesisAgent)</th>
+                                        <td>Receives all three sub-agent outputs and the raw market data. Weighs them against each other and produces the final structured advice — summary, why trending, risk factors, suggested plan (BUY YES / BUY NO / WAIT), and confidence. For premium calls, position sizing guidance is also included.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="callout-block callout-block-info">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-info-circle"></i></span>Sub-agents are read-only</h4>
+                                <p>No sub-agent can write to the database, execute trades, or call external APIs beyond their assigned data sources. The orchestrator is also read-only. Only AutoTradeEngine can trigger real transactions — and only after the full advice pipeline completes.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-5-2">
+                        <h2 class="section-heading">Conversation Memory</h2>
+                        <p>In v1, every advice call was stateless — the AI had no memory of previous questions from the same user about the same market. v2 introduces a <code>Conversation</code> table in Neon that stores multi-turn message history per user per market.</p>
+                        <p>When a user asks a follow-up question after receiving advice, the full conversation thread is injected into the prompt as context. The AI responds coherently within the existing discussion — it remembers what it said before, what the user asked, and the market's state at the time.</p>
+                        <h5>How conversation sessions work:</h5>
+                        <ul>
+                            <li><code>/advice market-001</code> — starts a new conversation, stores a <code>conversation_id</code></li>
+                            <li>Any free-text follow-up (e.g. <em>"What if BTC drops 10% first?"</em>) — bot detects the active conversation, loads history, sends full thread to the AI</li>
+                            <li><code>/newadvice</code> — clears context and starts a fresh session for the same or a different market</li>
+                        </ul>
+                        <div class="callout-block callout-block-warning">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-tags"></i></span>Context Window Cap</h4>
+                                <p>Conversations are capped at the last 10 exchanges to control token costs. Older messages are dropped from context but remain stored in Neon for audit history.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-5-3">
+                        <h2 class="section-heading">Kiswahili Support</h2>
+                        <p>The entire bot experience — market summaries, advice output, trade confirmations, and error messages — can be delivered in Kiswahili. Users switch language via <code>/language sw</code> and switch back with <code>/language en</code>. The preference is stored in their user record and persists across sessions.</p>
+                        <p>Language selection affects the AI prompt templates and bot response formatting. The underlying market data and signal scores remain in English internally — only the user-facing text is translated. This means all numerical data is always accurate regardless of language setting.</p>
+                    </section>
+                </article>
+
+                <!-- SECTION 6 — AUTO-TRADE ENGINE -->
+                <article class="docs-article" id="section-6">
+                    <header class="docs-header">
+                        <h1 class="docs-heading">Auto-Trade Engine</h1>
+                        <section class="docs-intro">
+                            <p>AutoTradeEngine is the backend subsystem that converts AI advice into real or paper trade actions. It runs after every advice call — but only triggers an actual trade if the user has enabled auto-trading, the confidence threshold is met, and all safeguards pass.</p>
+                        </section>
+                    </header>
+
+                    <section class="docs-section" id="item-6-1">
+                        <h2 class="section-heading">How It Works</h2>
+                        <p>After the AI advice pipeline completes and produces a <code>suggested_plan</code> and <code>confidence</code> value, AutoTradeEngine runs the following check sequence:</p>
+                        <ul>
+                            <li><strong>Mode check:</strong> Is the user in paper mode or real mode?</li>
+                            <li><strong>Auto-trade enabled:</strong> Has the user turned on <code>/enable_autotrade</code>?</li>
+                            <li><strong>Confidence gate:</strong> Is <code>confidence &gt;= user's configured threshold</code> (default 0.75)?</li>
+                            <li><strong>Idempotency check:</strong> Has this exact <code>advice_id</code> already triggered a trade? If yes, skip.</li>
+                            <li><strong>Bet size check:</strong> Is the computed trade amount within the user's configured maximum?</li>
+                        </ul>
+                        <p>If all checks pass and the plan is <strong>BUY YES</strong> or <strong>BUY NO</strong> (not <strong>WAIT</strong>), AutoTradeEngine calls the appropriate route: <code>POST /papertrade</code> for paper mode or <code>POST /trade/real</code> for real mode.</p>
+                    </section>
+
+                    <section class="docs-section" id="item-6-2">
+                        <h2 class="section-heading">Safeguards</h2>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr><th class="theme-bg-light">Idempotency key</th><td>Each advice call generates a unique <code>advice_id</code>. AutoTradeEngine stores this in Neon before executing. If the same advice_id is seen again (e.g. from a retry), the trade is skipped. Prevents double-execution under network failures.</td></tr>
+                                    <tr><th class="theme-bg-light">Confidence threshold</th><td>Default is 0.75 (75%). Users can raise this to be more conservative. AutoTradeEngine never executes on a WAIT recommendation regardless of threshold.</td></tr>
+                                    <tr><th class="theme-bg-light">Maximum bet size</th><td>Each user sets a per-trade maximum in their UserPermission record. AutoTradeEngine caps the trade amount to this value even if the AI suggests a larger position.</td></tr>
+                                    <tr><th class="theme-bg-light">WAIT hard block</th><td>If the AI returns WAIT, AutoTradeEngine exits immediately. No trade is placed. WAIT is never overridden by any configuration.</td></tr>
+                                    <tr><th class="theme-bg-light">Real mode confirmation</th><td>First-time real mode trades require an explicit <code>/confirm</code> command. Subsequent real trades within the same session can auto-execute if the user has set <code>auto_confirm=true</code>.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-6-3">
+                        <h2 class="section-heading">Paper vs Real Mode</h2>
+                        <p>Users switch modes with <code>/mode paper</code> or <code>/mode real</code>. Paper mode is the default. The mode is stored in the <code>UserPermission</code> table and persists between sessions.</p>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="theme-bg-light">Paper Mode</th>
+                                        <td>AutoTradeEngine calls <code>POST /papertrade</code>. Deducts from the $1,000 virtual balance in Neon. No real USDC moves. Full P&amp;L and leaderboard tracking still apply.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light">Real Mode</th>
+                                        <td>AutoTradeEngine calls <code>POST /trade/real</code>. The backend calls LI.FI to bridge USDC from Base to Polygon, then submits a signed order to Polymarket's CLOB API. Returns an on-chain transaction hash as proof. Real USDC is at stake.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="callout-block callout-block-danger">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-exclamation-triangle"></i></span>Real mode uses real funds</h4>
+                                <p>When in real mode, AutoTradeEngine moves actual USDC from the user's Base wallet. This is not reversible. Ensure your confidence threshold and bet size limits are set appropriately before enabling real mode.</p>
+                            </div>
+                        </div>
+                    </section>
+                </article>
+
+
+                <!-- SECTION 7 — COPY TRADING -->
+                <article class="docs-article" id="section-7">
+                    <header class="docs-header">
+                        <h1 class="docs-heading">Copy Trading</h1>
+                        <section class="docs-intro">
+                            <p>Copy trading in NORT v2 lets users automatically mirror the trades of high-performing "leader" users. When a leader's AutoTradeEngine fires a real trade that clears the stricter copy threshold (0.80 confidence), the backend fans out the same trade direction to all opted-in followers.</p>
+                        </section>
+                    </header>
+
+                    <section class="docs-section" id="item-7-1">
+                        <h2 class="section-heading">Leader &amp; Follower Model</h2>
+                        <p>Any user can become a leader if their portfolio performance qualifies them. Followers opt in to specific leaders — they choose who they copy and set their own per-copy bet size limit. Followers can opt out at any time.</p>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr><th class="theme-bg-light">Leader</th><td>A user whose advice sessions are marked <code>is_leader: true</code>. Their high-confidence AutoTradeEngine executions are eligible for fan-out to followers.</td></tr>
+                                    <tr><th class="theme-bg-light">Follower</th><td>A user who has opted to copy a specific leader. They set their own <code>copy_size_usdc</code> limit. They receive a notification every time a copy trade fires.</td></tr>
+                                    <tr><th class="theme-bg-light">Copy threshold</th><td>A copy trade fires only when the leader's advice has <code>confidence &gt;= 0.80</code> — stricter than the solo auto-trade threshold of 0.75. This is because bad leader advice gets multiplied across all followers.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-7-2">
+                        <h2 class="section-heading">Fan-Out Flow</h2>
+                        <p>When a leader's AutoTradeEngine fires and clears the copy threshold, the backend executes the following fan-out sequence:</p>
+                        <ul>
+                            <li>Query the <code>CopyRelationship</code> table for all followers of this leader</li>
+                            <li>For each follower, call <code>POST /trade/real</code> (or <code>/papertrade</code> if the follower is in paper mode) with the same market and direction but the follower's own <code>copy_size_usdc</code></li>
+                            <li>Each follower's trade is idempotency-keyed independently — a failure for one follower does not affect others</li>
+                            <li>Each follower receives a Telegram notification: <em>"Copied @leader's trade: YES on &lt;market&gt; at &lt;odds&gt;."</em></li>
+                        </ul>
+                        <div class="callout-block callout-block-info">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-info-circle"></i></span>Followers set their own sizes</h4>
+                                <p>A follower copying a leader never bets the same dollar amount as the leader. They set their own <code>copy_size_usdc</code> — e.g. a follower might copy every leader trade at $10 regardless of how much the leader bets.</p>
+                            </div>
+                        </div>
+                    </section>
+                </article>
+
+                <!-- SECTION 8 — V2 API REFERENCE -->
+                <article class="docs-article" id="section-8">
+                    <header class="docs-header">
+                        <h1 class="docs-heading">v2 API Reference</h1>
+                        <section class="docs-intro">
+                            <p>All v1 endpoints remain unchanged. v2 adds new routes for real trade execution, x402 verification, conversation management, user permissions, on-chain wallet balance, and copy trading. All new endpoints are available under the <code>/api</code> prefix.</p>
+                        </section>
+                    </header>
+
+                    <section class="docs-section" id="item-8-1">
+                        <h2 class="section-heading">Real Trade Routes</h2>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>POST /api/trade/real</code></th>
+                                        <td>Execute a real Polymarket trade. Requires <code>market_id</code>, <code>outcome</code> (YES/NO), <code>amount_usdc</code>, <code>wallet_address</code>, and <code>advice_id</code> (idempotency key). Triggers the LI.FI bridge and Polymarket CLOB submission. Returns a Polygon transaction hash.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>GET /api/trade/real/{id}</code></th>
+                                        <td>Get the status of a real trade by ID. Returns bridge status, Polymarket order status, on-chain receipt, and P&amp;L if the market has resolved.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>GET /api/wallet/onchain-balance</code></th>
+                                        <td>Returns the user's live on-chain USDC balance on both Base and Polygon. Used by the Risk Agent and shown in the dashboard wallet panel.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-8-2">
+                        <h2 class="section-heading">x402 &amp; Wallet Routes</h2>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>POST /api/x402/verify</code></th>
+                                        <td>Verify an x402 payment proof. Requires <code>tx_hash</code> and <code>user_id</code>. Fetches the transaction from Base, validates recipient, amount, and replay status. Stores a confirmed receipt in the Payment table if valid.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>GET /api/x402/status</code></th>
+                                        <td>Check whether the current user has a valid unexpired payment on file. Used by the bot to decide whether to show the payment gate or proceed directly to premium advice.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-8-3">
+                        <h2 class="section-heading">Conversation Routes</h2>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>POST /api/conversation/message</code></th>
+                                        <td>Send a follow-up message to an active advice conversation. Requires <code>conversation_id</code>, <code>user_id</code>, and <code>message</code>. Returns the AI's in-context response without re-running the full signals and search pipeline.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>GET /api/conversation/{id}</code></th>
+                                        <td>Retrieve the full message history for a conversation. Used by the dashboard chat panel to display the conversation thread.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>DELETE /api/conversation/{id}</code></th>
+                                        <td>Clear a conversation and start fresh. Equivalent to the <code>/newadvice</code> bot command.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="docs-section" id="item-8-4">
+                        <h2 class="section-heading">Permissions &amp; Copy Trading</h2>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>GET /api/permissions</code></th>
+                                        <td>Returns the current user's permission settings — trade mode, auto-trade toggle, confidence threshold, and max bet size.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>PATCH /api/permissions</code></th>
+                                        <td>Update permission settings. Accepts any subset of <code>trade_mode</code>, <code>auto_trade_enabled</code>, <code>confidence_threshold</code>, <code>max_bet_usdc</code>.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>POST /api/copytrading/follow</code></th>
+                                        <td>Follow a leader user. Requires <code>leader_id</code> and <code>copy_size_usdc</code>. Creates a <code>CopyRelationship</code> record. The follower will receive all future copy trade fan-outs from this leader.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>DELETE /api/copytrading/follow/{leader_id}</code></th>
+                                        <td>Unfollow a leader. Removes the <code>CopyRelationship</code> record. No further copy trades will be executed for this follower from this leader.</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="theme-bg-light"><code>GET /api/copytrading/leaders</code></th>
+                                        <td>Returns the list of available leaders with their current performance stats — win rate, net P&amp;L, and streak. Used by the dashboard's copy trading discovery panel.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </article>
+
+
+                <!-- SECTION 9 — FAQs -->
+                <article class="docs-article" id="section-9">
+                    <header class="docs-header">
+                        <h1 class="docs-heading">FAQs</h1>
+                        <section class="docs-intro">
+                            <p>Common questions about NORT v2's new features — real trading, x402 payments, copy trading, and conversation memory.</p>
+                        </section>
+                    </header>
+
+                    <section class="docs-section" id="item-9-1">
+                        <h2 class="section-heading">Real Trading</h2>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Is real trading the default in v2?</h5>
+                        <p>No. Paper mode is still the default for all users. Real mode must be explicitly enabled with <code>/mode real</code>. Users who never change their mode continue to use paper trading exactly as in v1 — nothing about their experience changes.</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Does NORT hold my USDC at any point?</h5>
+                        <p>No. NORT is non-custodial. Your USDC stays in your Base smart wallet until the moment a trade fires — at which point it goes directly from your wallet to Polymarket via the bridge. NORT's backend constructs and coordinates the transaction but never controls the funds.</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>What happens if the bridge fails mid-transaction?</h5>
+                        <p>The AutoTradeEngine detects the failure, does not submit the Polymarket order, and queues a retry. It checks on-chain state before retrying to confirm the original transaction did not complete — preventing double-bridging. You receive a bot notification explaining the status.</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>How long does a real trade take end to end?</h5>
+                        <p>With Across as the bridge route (LI.FI's most common pick), bridging takes approximately 1–2 minutes. The Polymarket CLOB order submission takes a few seconds. Total end-to-end: roughly 2–3 minutes from AutoTradeEngine trigger to confirmed on-chain trade.</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Do I need ETH to pay gas on Base?</h5>
+                        <p>No. NORT's Paymaster sponsors gas for all Base transactions. You only need USDC. Gas on Polygon for the Polymarket submission is either covered by the bridge relayer or by the Polymarket protocol.</p>
+                    </section>
+
+                    <section class="docs-section" id="item-9-2">
+                        <h2 class="section-heading">x402 Payments</h2>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>What does the $0.10 x402 payment unlock?</h5>
+                        <p>One premium advice call for any market. The payment is per-query — once used, the next premium advice request requires a new payment. The cost covers the deeper multi-agent analysis with position sizing guidance that the free advice tier does not include.</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Can I reuse the same transaction hash for multiple advice calls?</h5>
+                        <p>No. Transaction hashes are unique in the Payment table (replay protection). The first submission of a hash consumes it — any subsequent attempt with the same hash is rejected with "Proof already used."</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Where does the $0.10 go?</h5>
+                        <p>To NORT's treasury wallet on Base. x402 payments never leave Base and are never bridged to Polygon. They are completely independent of the trade execution flow.</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Is free advice still available in v2?</h5>
+                        <p>Yes. <code>/advice &lt;market-id&gt;</code> still provides free AI analysis using the single-agent pipeline from v1, now enhanced with sentiment and technical sub-agents in the background. The premium tier (gated by x402) adds the Risk Agent's position sizing guidance and extended context window.</p>
+                    </section>
+
+                    <section class="docs-section" id="item-9-3">
+                        <h2 class="section-heading">Copy Trading</h2>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>How do I become a leader?</h5>
+                        <p>Leader status is granted based on trading performance. A user qualifies as a leader after meeting a minimum trade count, win rate, and net P&amp;L threshold. The exact criteria are reviewed by the NORT team — there is no self-nomination.</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Can I lose money via copy trading?</h5>
+                        <p>Yes. Copy trades execute real USDC if you are in real mode. You set your own <code>copy_size_usdc</code> limit and can unfollow a leader at any time. NORT does not guarantee any leader's performance — past win rates are indicative only.</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Why is the copy threshold higher (0.80) than the solo threshold (0.75)?</h5>
+                        <p>Because a bad leader trade gets multiplied. If a leader has 50 followers and AutoTradeEngine fires on a 0.76 confidence call that turns out wrong, 50 separate real-money trades all lose. The stricter threshold exists to protect followers by only copying the highest-conviction calls.</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Can I copy trade in paper mode?</h5>
+                        <p>Yes. If your trade mode is set to paper, copy trades also execute in paper mode regardless of whether the leader is trading real money. Your paper balance is deducted and the copy trade appears in your trade history and leaderboard stats.</p>
+
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Does copying a leader use my own AI analysis or theirs?</h5>
+                        <p>Copy trades execute the same <em>direction</em> as the leader (YES or NO on the same market) but use your own configured bet size. They are not re-analysed — the trade fires based on the leader's advice and confidence score, not a fresh analysis for each follower.</p>
+                    </section>
+                </article>
+
+                <footer class="footer">
+                    <div class="container text-center py-5">
+                        <small class="copyright">NORT v2.0 · Built on Base · <a href="https://www.nortapp.online/" target="_blank" style="color:var(--teal)">nortapp.online</a> · <a href="docs-page.html" style="color:var(--text-muted)">← v1 Docs</a></small>
+                        <ul class="social-list list-unstyled pt-4 mb-0">
+                            <li class="list-inline-item"><a href="#"><i class="fa-brands fa-github fa-fw"></i></a></li>
+                            <li class="list-inline-item"><a href="#"><i class="fa-brands fa-x-twitter fa-fw"></i></a></li>
+                            <li class="list-inline-item"><a href="#"><i class="fa-brands fa-telegram fa-fw"></i></a></li>
+                        </ul>
+                    </div>
+                </footer>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/plugins/popper.min.js"></script>
+    <script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/plugins/smoothscroll.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
+    <script src="assets/js/highlight-custom.js"></script>
+    <script src="assets/plugins/simplelightbox/simple-lightbox.min.js"></script>
+    <script src="assets/plugins/gumshoe/gumshoe.polyfills.min.js"></script>
+    <script src="assets/js/docs.js"></script>
+</body>
+</html>

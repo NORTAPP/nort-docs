@@ -1,0 +1,427 @@
+# USDC Base → Polygon Bridge: Deep Dive
+
+> **Context**: User holds USDC on Base. Polymarket runs on Polygon PoS.
+> This document covers how to move funds across, the tradeoffs, and the exact tech.
+> **Recommended approach: LI.FI** — aggregates all bridge routes and picks the best one automatically.
+
+---
+
+## What You're Moving
+
+| | Base | Polygon |
+|---|---|---|
+| **Token** | Native USDC (Circle-issued) | Native USDC (Circle-issued on Polygon) |
+| **Contract** | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` | `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` |
+| **Gas token** | ETH (very cheap ~$0.001) | MATIC (very cheap ~$0.001) |
+
+> [!IMPORTANT]
+> Polymarket uses **native USDC on Polygon**, not USDC.e (the old bridged version). This matters — sending USDC.e to Polymarket will fail. Both CCTP and Across deliver native USDC, so either approach works correctly.
+
+---
+
+## Recommended Approach: LI.FI (Bridge Aggregator)
+
+### What LI.FI Is
+
+LI.FI is not a bridge itself — it is a **bridge aggregator and route optimizer**. When you call LI.FI, it:
+1. Queries all available bridges in real time (Across, CCTP, Stargate, Hop, Synapse, and more)
+2. Compares routes by speed, cost, and output amount
+3. Picks the best route and executes it in a single transaction
+
+This means you write **one integration** and automatically get access to every bridge. If Across is cheapest today and CCTP is fastest tomorrow, LI.FI switches automatically — your code never changes.
+
+```
+User wallet (Base)
+       │
+       ▼
+LI.FI SDK → queries all bridges simultaneously
+       │        ├── Across:   $49.90 output, 2 min
+       │        ├── CCTP:     $49.98 output, 18 min
+       │        └── Stargate: $49.85 output, 3 min
+       │
+       ▼
+Picks best route (Across in this case)
+       │
+       ▼
+Executes in one signed tx from user's Base wallet
+       │
+       ▼
+USDC arrives on Polygon (~2 min)
+```
+
+### Why LI.FI for Your Use Case
+
+| Need | How LI.FI Handles It |
+|---|---|
+| USDC Base → USDC Polygon (not USDC.e) | Filters routes by output token — only shows native USDC routes |
+| Best rate automatically | Compares all bridges live — no manual route picking |
+| Single SDK call | `LiFi.getQuote()` → `LiFi.executeRoute()` — done |
+| Fallback if one bridge is down | Automatically reroutes to next best |
+| Testnet support | Base Sepolia → Polygon Amoy supported |
+
+### LI.FI SDK (TypeScript/JS — runs in your bot backend or frontend)
+
+```typescript
+import { LiFi, ChainId, CoinKey } from '@lifi/sdk';
+
+const lifi = new LiFi({ integrator: 'nort-advisor' });
+
+// Step 1: Get the best quote
+const quote = await lifi.getQuote({
+  fromChain: ChainId.BAS,      // Base
+  toChain: ChainId.POL,        // Polygon
+  fromToken: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC Base
+  toToken:   '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359', // USDC Polygon
+  fromAmount: String(amount * 1e6),  // USDC has 6 decimals
+  fromAddress: userBaseWallet,
+  toAddress: userPolygonWallet,
+  slippage: 0.005,  // 0.5% max slippage
+});
+
+// Show user before committing:
+// quote.estimate.toAmount     → USDC received on Polygon
+// quote.estimate.executionDuration → seconds
+// quote.estimate.feeCosts     → fee breakdown
+
+// Step 2: Execute (signs from user wallet)
+const result = await lifi.executeRoute(signer, quote);
+// result.steps[0].execution.txHash → Polygon receipt
+```
+
+### Python backend wrapper (calling your JS service or LI.FI REST API)
+
+```python
+import httpx
+
+async def bridge_usdc_lifi(from_wallet: str, to_wallet: str, amount_usdc: float) -> dict:
+    async with httpx.AsyncClient() as client:
+        # Step 1: Get quote
+        quote = await client.get("https://li.quest/v1/quote", params={
+            "fromChain": "BAS",
+            "toChain": "POL",
+            "fromToken": "USDC",
+            "toToken": "USDC",
+            "fromAmount": int(amount_usdc * 1e6),
+            "fromAddress": from_wallet,
+            "toAddress": to_wallet,
+        })
+        quote_data = quote.json()
+        # Step 2: Sign and execute via wallet infrastructure (blockchain intern)
+        return {
+            "route": quote_data["tool"],          # e.g. "across"
+            "output_amount": quote_data["estimate"]["toAmount"],
+            "duration_seconds": quote_data["estimate"]["executionDuration"],
+            "tx_data": quote_data["transactionRequest"],  # pass to signer
+        }
+```
+
+---
+
+## Fallback Approaches (if LI.FI is unavailable)
+
+| | CCTP (Circle) | Across Protocol |
+|---|---|---|
+| **Speed** | 15–20 minutes | 1–2 minutes |
+| **Security** | Highest — Circle burns/mints natively | High — UMA oracle, audited |
+| **Cost** | Gas only (~$0.02 total) | Gas + 0.1–0.2% bridge fee |
+| **Slippage** | Zero | Zero (fixed relayer quote) |
+| **Custody risk** | None | Relayer fronts funds (repaid later) |
+| **Best for** | Production / real money | Hackathon demo / fast UX |
+
+---
+
+## Option A — CCTP (Cross-Chain Transfer Protocol) by Circle
+
+### How it works
+Circle operates a burn-and-mint model: USDC is **destroyed** on Base and **freshly minted** on Polygon. No bridge pool, no wrapped tokens, no custodian.
+
+```
+User's Base Wallet
+       │
+       ▼
+1. burnUSDC on Base
+   TokenMessenger.depositForBurn(amount, destinationDomain=7, recipient, burnToken)
+       │
+       ▼
+2. Circle attestation service monitors the burn event
+   Waits for ~12 block confirmations on Base (~24 seconds)
+   Circle signs an attestation (proof the burn happened)
+       │
+       ▼
+3. Poll Circle API until attestation ready
+   GET https://iris-api.circle.com/attestations/{messageHash}
+   Typically ready in 10–15 minutes
+       │
+       ▼
+4. Mint USDC on Polygon
+   MessageTransmitter.receiveMessage(message, attestation)
+   → Fresh USDC appears in recipient wallet on Polygon
+```
+
+### Exact contracts
+
+| Contract | Base | Polygon |
+|---|---|---|
+| TokenMessenger | `0x1682Ae6375C4E4A97e4B583BC394c861A46D8962` | `0x9daF8c91AABE-...` |
+| MessageTransmitter | `0xAD09780d193884d503182aD4588450C416D6F9D4` | `0xF3be9355363857-...` |
+
+> Always verify current addresses at: [developers.circle.com/stablecoins/docs/cctp-protocol-contract](https://developers.circle.com/stablecoins/docs/cctp-protocol-contract)
+
+### SDK / Code
+
+```python
+# Python backend (services/backend) — using web3.py
+from web3 import Web3
+
+w3_base = Web3(Web3.HTTPProvider(os.getenv("BASE_RPC_URL")))
+w3_polygon = Web3(Web3.HTTPProvider(os.getenv("POLYGON_RPC_URL")))
+
+TOKEN_MESSENGER_BASE = "0x1682Ae6375C4E4A97e4B583BC394c861A46D8962"
+POLYGON_DOMAIN = 7
+
+def burn_usdc_on_base(user_wallet, amount_usdc, recipient_on_polygon):
+    # Step 1: Approve TokenMessenger to spend USDC
+    # Step 2: Call depositForBurn
+    tx = token_messenger.functions.depositForBurn(
+        amount_usdc,          # amount in USDC units (6 decimals)
+        POLYGON_DOMAIN,       # destination: Polygon = 7
+        recipient_on_polygon,
+        USDC_BASE_ADDRESS
+    ).build_transaction({...})
+    # Sign with user's smart wallet (via ERC-4337)
+    return signed_tx_hash
+
+def poll_attestation(message_hash: str) -> str:
+    import requests, time
+    url = f"https://iris-api.circle.com/attestations/{message_hash}"
+    while True:
+        r = requests.get(url).json()
+        if r.get("status") == "complete":
+            return r["attestation"]
+        time.sleep(15)
+
+def mint_usdc_on_polygon(message: bytes, attestation: str):
+    tx = message_transmitter_polygon.functions.receiveMessage(
+        message, bytes.fromhex(attestation[2:])
+    ).build_transaction({...})
+    return signed_tx_hash
+```
+
+### Gas breakdown (CCTP)
+| Step | Chain | Estimated cost |
+|---|---|---|
+| Approve USDC | Base | ~$0.001 |
+| depositForBurn | Base | ~$0.01 |
+| receiveMessage (mint) | Polygon | ~$0.005 |
+| **Total** | | **~$0.016** |
+
+---
+
+## Option B — Across Protocol (Recommended for Hackathon)
+
+### How it works
+Across uses liquidity pools and relayers. A relayer immediately sends USDC to the user on Polygon from their own pool, then is repaid via CCTP or the canonical bridge later. The user sees funds arrive in ~1–2 minutes.
+
+```
+User's Base Wallet
+       │
+       ▼
+1. Call SpokePool.deposit() on Base
+   amount, outputAmount (after fee), destinationChainId=137, recipient
+       │
+       ▼
+2. Relayer (Across) sees the deposit event
+   Immediately sends USDC to recipient on Polygon from its own pool
+   (this takes ~1–2 minutes)
+       │
+       ▼
+3. Across protocol repays relayer via slow canonical bridge
+   (This happens in the background — user doesn't wait for this)
+```
+
+### SDK
+
+```javascript
+// Frontend or Node.js — @across-protocol/sdk-v2
+import { createAcrossClient } from "@across-protocol/sdk-v2";
+
+const client = createAcrossClient({ chains: [base, polygon] });
+
+const quote = await client.getQuote({
+  inputToken:  "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // USDC on Base
+  outputToken: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", // USDC on Polygon
+  inputAmount: BigInt(amount * 1e6),
+  originChainId: 8453,       // Base
+  destinationChainId: 137,   // Polygon
+  recipient: userPolygonWallet,
+});
+
+// quote.fees.totalRelayFee.pct → fee percentage shown to user
+await client.executeQuote({ quote, wallet: userSigner });
+```
+
+### Gas breakdown (Across)
+| Step | Chain | Estimated cost |
+|---|---|---|
+| SpokePool.deposit() | Base | ~$0.01 |
+| Relayer sends USDC | Polygon | Relayer pays (included in their fee) |
+| Protocol fee | — | ~0.1–0.2% of amount |
+| **Total on $100** | | **~$0.10–0.20 + $0.01 gas** |
+
+---
+
+## Gas Fee Management
+
+### User-side (your responsibility)
+Users need ETH on Base for gas and MATIC on Polygon for gas after bridging.
+
+**Problem**: A new user may arrive with only USDC and no gas tokens.
+
+**Solutions:**
+
+| Approach | How | Tradeoff |
+|---|---|---|
+| **Gas sponsorship** (recommended for hackathon) | Use ERC-4337 Paymaster — your backend pays gas on behalf of users | Small cost, great UX |
+| **Gas included in bridge** | Across can deliver a small amount of MATIC alongside USDC | Across `outputAmountInNative` parameter |
+| **User buys gas separately** | MPesa on-ramp also sends a small MATIC dust amount | Simplest but extra step for user |
+
+**ERC-4337 Paymaster (recommended):**
+Use Coinbase's `paymaster` on Base testnet — it sponsors gas for smart wallet transactions for free during development.
+
+---
+
+## Batching Analysis
+
+**Should you batch bridge transactions?**
+
+**Short answer: No, not for the hackathon.**
+
+| Scenario | Batch? | Why |
+|---|---|---|
+| Single user trade | No — immediate | Latency matters for UX |
+| Multiple users trading simultaneously | No — each user bridges independently | Can't combine different users' USDC |
+| Refilling your protocol's liquidity pool | Yes — batch top-ups | Saves gas on admin operations |
+
+**If you did batch** (future consideration):
+- Collect N user deposits in a smart contract escrow
+- Bridge the total once when batch threshold is reached (e.g. >$500 or >10 users)
+- Distribute on Polygon side
+- Problem: users wait for batch to fill — unacceptable for live trading UX
+
+---
+
+## Security Model
+
+```
+Risk Layer            CCTP            Across
+─────────────────────────────────────────────
+Bridge hack           ✅ None          ⚠️  Low (audited pools)
+Relayer fraud         ✅ None          ✅  Bonded + slashed by UMA
+Mint wrong amount     ✅ Impossible    ✅  Quote locked at send time
+Smart contract risk   Low (Circle)    Low (audited, $1B+ volume)
+Censorship            Low             Low
+```
+
+**Additional safeguards to implement:**
+1. **Amount limits**: Cap per-tx at $500 for testnet, prevent fat-finger errors
+2. **Slippage guard**: Check `outputAmount >= inputAmount * 0.995` before signing
+3. **Recipient validation**: Always verify `recipient == user's own wallet`, never a contract address you don't control
+4. **Private key isolation**: User smart wallet keys never touch your backend — signing happens client-side or via MPC wallet
+
+---
+
+## Speed Comparison
+
+```
+CCTP:
+  Block confirm on Base    → 24 seconds
+  Circle attestation       → 10–15 minutes
+  Mint on Polygon          → 30 seconds
+  Total                    → ~15 minutes
+
+Across:
+  Block confirm on Base    → 24 seconds
+  Relayer fills on Polygon → 1–3 minutes
+  Total                    → ~2 minutes
+
+Canonical Base Bridge (DO NOT USE):
+  Base → Ethereum L1       → 7 days (fraud proof window)
+  Ethereum → Polygon       → 20 minutes
+  Total                    → ~7 days ❌
+```
+
+---
+
+## How LI.FI Affects the x402 Payment Flow
+
+This is important: **x402 payments happen on Base, bridging happens for Polymarket trades. They are two separate money flows.**
+
+```
+User's Base Wallet (USDC on Base)
+         │
+         ├─── x402 premium payment ──→ NORT's Base wallet (stays on Base)
+         │    small amount, e.g. $0.10  No bridge needed. Instant.
+         │
+         └─── Trade execution ──────→ LI.FI bridge → Polygon → Polymarket
+              larger amount, e.g. $50  Bridged. ~2 min.
+```
+
+**x402 never crosses the bridge.** The x402 payment is a micro-payment from the user's Base wallet to your platform's Base wallet to unlock premium advice. It stays on Base entirely. Only the trade capital gets bridged to Polygon for Polymarket execution.
+
+See [x402_deep_dive.md](x402_deep_dive.md) for the full x402 payment architecture.
+
+---
+
+## Recommended Stack (Hackathon)
+
+| Layer | Technology | Why |
+|---|---|---|
+| User wallet on Base | **Coinbase Smart Wallet** (ERC-4337) | Native Base support, MPC key management, free on testnet |
+| Bridge aggregator | **LI.FI SDK** (`@lifi/sdk`) | Single integration, auto-picks best route, USDC native output |
+| Bridge fallback | **Across Protocol** | LI.FI's most common pick anyway |
+| Gas sponsorship | **Coinbase Paymaster** | Free on Base Sepolia testnet |
+| Polygon RPC | **Alchemy / QuickNode** | Reliable, free tier for hackathon |
+| Base RPC | **Base Sepolia RPC** (`https://sepolia.base.org`) | Official, free |
+| USDC faucet (testnet) | **Circle testnet faucet** | Free testnet USDC on Base Sepolia |
+
+---
+
+## End-to-End Flow in Your App
+
+```
+1. User loads wallet via MPesa
+   → Transak/MoonPay: KES → USDC → deposited to user's Base smart wallet
+
+2. User pays for premium advice (stays on Base)
+   → x402: $0.10 USDC from user's Base wallet → NORT's Base wallet
+   → Instant, no bridge needed
+
+3. User triggers trade (auto or manual)
+   → AutoTradeEngine calls bridge service
+
+4. Bridge service (your backend):
+   a. Call LI.FI REST API → get best route for USDC Base→Polygon
+   b. Show user: "Bridge $50 USDC via Across (fee: $0.08, arrives in ~2 min)"
+   c. User confirms (or auto-confirm if auto_trade_enabled)
+   d. Sign and execute from user's Base smart wallet
+
+5. ~2 minutes later: USDC on Polygon
+   → Backend detects arrival (listen to Polygon transfer event)
+   → Execute Polymarket CLOB signed order
+   → On-chain tx hash returned as receipt
+
+6. Bot notifies user:
+   "✅ Bridge complete — $49.92 USDC on Polygon. Trade executing..."
+   "✅ Trade logged: YES on market-001 at 72% odds. Tx: 0xabc..."
+```
+
+---
+
+## Testnet Setup Checklist
+
+- [ ] Base Sepolia RPC: `https://sepolia.base.org`
+- [ ] Polygon Amoy (Polygon testnet) RPC: `https://rpc-amoy.polygon.technology`
+- [ ] Get testnet USDC from Circle: [faucet.circle.com](https://faucet.circle.com)
+- [ ] Across testnet bridge: supports Base Sepolia → Polygon Amoy
+- [ ] CCTP testnet contracts available at developers.circle.com
+- [ ] Coinbase Smart Wallet: works on Base Sepolia out of the box
