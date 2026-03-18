@@ -22,16 +22,26 @@
 <body class="docs-page">
     <header class="header fixed-top">
         <div class="branding docs-branding">
-            <div class="container-fluid position-relative py-2">
-                <div class="docs-logo-wrapper">
-                    <button id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible me-2 d-xl-none" type="button">
+            <div class="docs-navbar-inner d-flex align-items-center w-100">
+                <!-- LEFT: Hamburger + Logo -->
+                <div class="docs-navbar-left d-flex align-items-center">
+                    <button id="docs-sidebar-toggler" class="docs-sidebar-toggler docs-sidebar-visible d-xl-none me-2" type="button">
                         <span></span><span></span><span></span>
                     </button>
-                    <div class="site-logo">
-                        <a class="navbar-brand" href="index.html"><span class="logo-text">NORT</span></a>
-                    </div>
+                    <a class="navbar-brand docs-navbar-logo" href="index.html">
+                        <span class="logo-text">NORT</span>
+                    </a>
                 </div>
-                <div class="docs-navbar-right" style="margin-left:auto;">
+                <!-- CENTER: Search -->
+                <div class="docs-navbar-center flex-grow-1 d-flex justify-content-center">
+                    <form class="search-form docs-navbar-search">
+                        <i class="fas fa-search docs-search-icon"></i>
+                        <input type="text" placeholder="Search the docs..." name="search" class="form-control search-input">
+                        <kbd class="docs-search-kbd">⌘K</kbd>
+                    </form>
+                </div>
+                <!-- RIGHT: Version dropdown -->
+                <div class="docs-navbar-right d-flex align-items-center">
                     <div class="dropdown" id="docs-version-dropdown">
                         <button class="btn docs-version-btn d-flex align-items-center gap-2" id="docsVersionBtn" data-bs-toggle="dropdown" aria-expanded="false" style="background:rgba(255,255,255,0.07);border:1px solid rgba(96,165,250,0.4);border-radius:20px;padding:6px 14px;color:#fff;font-size:0.8rem;font-family:'DM Mono',monospace;">
                             <span class="docs-version-dot" style="background:#60A5FA;box-shadow:0 0 6px #60A5FA;"></span>
@@ -868,9 +878,6 @@ GET https://li.quest/v1/status?txHash={hash}
                     <div class="container text-center py-5">
                         <small class="copyright">NORT v2.0 · Built on Base · <a href="https://www.nortapp.online/" target="_blank" style="color:var(--teal)">nortapp.online</a> · <a href="docs-page.html" style="color:var(--text-muted)">← v1 Docs</a></small>
                         <ul class="social-list list-unstyled pt-4 mb-0">
-                            <li class="list-inline-item"><a href="#"><i class="fa-brands fa-github fa-fw"></i></a></li>
-                            <li class="list-inline-item"><a href="#"><i class="fa-brands fa-x-twitter fa-fw"></i></a></li>
-                            <li class="list-inline-item"><a href="#"><i class="fa-brands fa-telegram fa-fw"></i></a></li>
                         </ul>
                     </div>
                 </footer>
