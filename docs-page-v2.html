@@ -137,7 +137,7 @@
                         <h2 class="section-heading">v2 Overview</h2>
                         <p>Everything in v1 still works unchanged. v2 adds these capabilities on top:</p>
                         <ul>
-                            <li><strong>Base Smart Wallets</strong> — Every user gets a Coinbase Smart Wallet (ERC-4337) on Base. Funded via MPesa or card through Transak. Gas is sponsored so users never manually buy ETH or MATIC.</li>
+                            <li><strong>Base Smart Wallets</strong> — Every user gets a Privy Smart Wallet (ERC-4337) on Base. Funded via MPesa through Fonbnk or direct crypto. Gas is sponsored via Privy's Paymaster so users never manually buy ETH or MATIC.</li>
                             <li><strong>USDC Bridge via LI.FI</strong> — USDC moves from Base to Polygon automatically before each real Polymarket trade. LI.FI selects the best route across Across, CCTP, and Stargate.</li>
                             <li><strong>x402 Micro-Payments</strong> — Premium AI advice is gated behind a $0.10 USDC payment on Base. No subscriptions. One payment unlocks one premium advice call.</li>
                             <li><strong>Multi-Agent AI (AI Agent v2)</strong> — Three specialised sub-agents (Sentiment, Risk, Technical) now collaborate before producing a final structured output. Conversation memory enables multi-turn follow-up questions.</li>
@@ -200,43 +200,78 @@
                     <header class="docs-header">
                         <h1 class="docs-heading">Base Smart Wallets</h1>
                         <section class="docs-intro">
-                            <p>Every NORT v2 user gets a personal Coinbase Smart Wallet deployed on Base — a self-custodied ERC-4337 smart contract account. This wallet holds their USDC on Base, receives on-ramp deposits, and signs all trade transactions. NORT never controls it.</p>
+                            <p>Every NORT v2 user gets a personal <strong>Privy Smart Wallet</strong> (ERC-4337) deployed on Base — a self-custodied smart contract account. This wallet holds their USDC on Base, receives on-ramp deposits, and signs all trade transactions. NORT never controls it.</p>
                         </section>
                     </header>
 
                     <section class="docs-section" id="item-2-1">
                         <h2 class="section-heading">How Wallets Work</h2>
-                        <p>Smart wallets (ERC-4337) differ from regular Ethereum wallets in two important ways for this use case. First, they support <strong>batched transactions</strong> — multiple operations (e.g. approve USDC + call bridge) can be submitted as one atomic transaction. Second, they support <strong>Paymasters</strong>, which allow a third party (NORT's backend) to sponsor gas on behalf of the user.</p>
-                        <p>When a new user interacts with NORT v2 for the first time, a smart wallet is deployed for them on Base Sepolia (testnet) or Base mainnet. The wallet address is stored in their user record and linked to their Telegram ID. All subsequent operations — bridging, x402 payments, real trades — are signed by this wallet.</p>
+                        <p>NORT uses <strong>Privy Smart Wallets</strong> — ERC-4337 account abstraction wallets deployed on Base. They offer four key advantages over standard EOA wallets for NORT's use case:</p>
+                        <ul>
+                            <li><strong>Gas sponsorship via Paymaster</strong> — NORT pays gas on behalf of users, so beginners never need ETH to transact.</li>
+                            <li><strong>Batched transactions</strong> — bridge + trade can be submitted as one atomic operation instead of two separate approvals.</li>
+                            <li><strong>Session keys</strong> — users can pre-authorise trading sessions so the bot can execute without prompting every time.</li>
+                            <li><strong>Social recovery</strong> — beginners can recover wallets via email or phone number, not seed phrases.</li>
+                        </ul>
+                        <p>Privy smart wallets are <strong>counterfactual</strong> — they are created instantly off-chain and only deployed on-chain when the first transaction is sent. This means sign-up has zero gas cost. When a new user onboards, the wallet address is stored in their <code>WalletConfig</code> record and linked to their Telegram ID. All subsequent operations — bridging, x402 payments, real trades — originate from this wallet.</p>
                         <div class="callout-block callout-block-info">
                             <div class="content">
                                 <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-info-circle"></i></span>Key Management</h4>
-                                <p>Smart wallet keys are managed by Coinbase's MPC infrastructure or by the user's own Privy embedded wallet. NORT's backend never stores or sees private keys. Signing happens client-side or via the wallet SDK.</p>
+                                <p>Private keys are managed entirely by Privy — NORT's backend never stores or sees them. Signing happens via Privy's embedded wallet SDK. The <code>defaultChain: base</code> config in <code>PrivyProvider</code> ensures wallets are created on Base, not Ethereum mainnet.</p>
                             </div>
+                        </div>
+
+                        <h5 class="pt-3">Onboarding by user type</h5>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <thead><tr><th>Step</th><th>Experienced Web3 User</th><th>New User (no wallet)</th><th>New User (MPesa)</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Sign Up</td><td>Connect MetaMask / Coinbase Wallet via Privy</td><td>Sign up with email or phone via Privy</td><td>Sign up with phone number via Privy</td></tr>
+                                    <tr><td>Wallet</td><td>Existing wallet linked</td><td>Privy creates embedded smart wallet on Base</td><td>Privy creates embedded smart wallet on Base</td></tr>
+                                    <tr><td>Funding</td><td>Self-fund from existing holdings</td><td>Prompted to fund via Fonbnk or direct crypto</td><td>Fonbnk converts MPesa → USDC → deposits to Base wallet</td></tr>
+                                    <tr><td>Trading</td><td>Immediate access to paper + real modes</td><td>Paper mode first; real mode after min. balance</td><td>Paper mode first; real mode after min. balance</td></tr>
+                                    <tr><td>Polymarket</td><td>Backend bridges Base USDC → Polygon when trade placed</td><td>Same — bridge is invisible to user</td><td>Same — bridge is invisible to user</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </section>
 
                     <section class="docs-section" id="item-2-2">
                         <h2 class="section-heading">MPesa On-Ramp</h2>
-                        <p>Users in Kenya and other MPesa markets can fund their Base smart wallet directly from their phone without a crypto exchange. The on-ramp flow is handled by <strong>Transak</strong> (or MoonPay as fallback):</p>
+                        <p>Users in Kenya and other MPesa markets can fund their Base smart wallet directly from their phone without a crypto exchange. The on-ramp flow is handled by <strong>Fonbnk</strong>:</p>
                         <ul>
                             <li>User initiates a deposit from the NORT dashboard or Telegram bot</li>
-                            <li>Transak opens an in-app or browser widget — user enters KES amount and confirms with MPesa PIN</li>
-                            <li>Transak converts KES to USDC and deposits directly to the user's Base smart wallet address</li>
-                            <li>NORT backend listens for the on-chain deposit event and updates the displayed balance</li>
+                            <li>Fonbnk converts MPesa KES to USDC and deposits directly to the user's Base smart wallet address</li>
+                            <li>NORT backend listens for the Fonbnk webhook, verifies the HMAC signature, then confirms the on-chain deposit and updates the displayed balance</li>
+                            <li>Balances are displayed in the user's local currency (KES, NGN, GHS) — not raw USDC — using a server-side FX rate cache that refreshes every 60 seconds</li>
                         </ul>
-                        <p>Card payments (Visa, Mastercard) follow the same flow and deposit USDC to the same wallet address. No manual crypto transfer required in either case.</p>
+                        <div class="callout-block callout-block-info">
+                            <div class="content">
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-info-circle"></i></span>Local Currency Display</h4>
+                                <p>All on-chain values are stored as USDC internally. The backend exposes a <code>GET /fx/rates</code> endpoint that converts amounts to the user's preferred currency before display. A balance of 50 USDC shows as <strong>KSh 6,475</strong> for a Kenyan user — immediately meaningful, not raw crypto.</p>
+                            </div>
+                        </div>
                     </section>
 
                     <section class="docs-section" id="item-2-3">
                         <h2 class="section-heading">Gas Sponsorship</h2>
-                        <p>A common barrier for new crypto users is needing a gas token (ETH on Base, MATIC on Polygon) before they can do anything with their USDC. NORT v2 eliminates this with Paymaster sponsorship.</p>
-                        <p>NORT's backend registers as a Paymaster on Base using <strong>Coinbase's ERC-4337 Paymaster</strong> (free on Base Sepolia during development). When a user triggers any Base transaction, the Paymaster pays the gas on their behalf. The user only needs USDC — never ETH.</p>
-                        <p>On Polygon, gas is covered by the bridge relayer (Across includes MATIC dust with USDC delivery) or by the Polymarket protocol itself for CLOB submissions.</p>
+                        <p>A common barrier for new crypto users is needing a gas token (ETH on Base, MATIC on Polygon) before they can do anything with their USDC. NORT v2 eliminates this entirely using <strong>Privy's Paymaster</strong>.</p>
+                        <p>Privy's Paymaster is built into the smart wallet SDK. NORT funds a Paymaster contract with ETH on Base, and all user transactions on Base are routed through it automatically — the user only needs USDC, never ETH. Per-user daily spending caps can be set to prevent abuse.</p>
+                        <div class="table-responsive my-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr><th class="theme-bg-light">Base: x402 USDC payment for advice</th><td>NORT sponsored via Privy Paymaster</td></tr>
+                                    <tr><th class="theme-bg-light">Base: USDC deposit from Fonbnk</th><td>NORT sponsored — user never sees this</td></tr>
+                                    <tr><th class="theme-bg-light">Base → Polygon: LI.FI bridge</th><td>Deducted from bridge amount (LI.FI handles)</td></tr>
+                                    <tr><th class="theme-bg-light">Polygon: Polymarket trade execution</th><td>Paid in MATIC; LI.FI can bundle gas into bridge amount</td></tr>
+                                    <tr><th class="theme-bg-light">Polygon → Base: profit withdrawal</th><td>NORT can sponsor or deduct from profit</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <div class="callout-block callout-block-success">
                             <div class="content">
-                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-thumbs-up"></i></span>Zero gas friction</h4>
-                                <p>Users fund with KES, trade on Polymarket, and never think about ETH or MATIC. The entire gas layer is abstracted away.</p>
+                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-thumbs-up"></i></span>Negligible cost</h4>
+                                <p>At current Base gas prices (~0.001 Gwei), sponsoring 1,000 user transactions costs approximately $0.10–$0.50 total. Even at 100,000 transactions/month, the gas budget is under $50 — negligible relative to the UX benefit of removing all gas friction.</p>
                             </div>
                         </div>
                     </section>
@@ -254,8 +289,10 @@
 
                     <section class="docs-section" id="item-3-1">
                         <h2 class="section-heading">Why We Bridge</h2>
-                        <p>The user's wallet lives on Base. Polymarket's CLOB (Central Limit Order Book) requires <strong>native USDC on Polygon</strong> — specifically the Circle-issued token at address <code>0x3c499c...3359</code>. The two chains use different tokens even though both are called USDC. Sending the wrong token to Polymarket fails silently.</p>
-                        <p>The canonical Base bridge (Base → Ethereum L1) has a 7-day fraud proof window. That makes it unusable for live trading. LI.FI's recommended routes (Across and CCTP) both deliver <strong>native USDC</strong> on Polygon in under 2 minutes with zero slippage.</p>
+                        <p>The user's wallet lives on Base. Polymarket's CLOB requires <strong>native USDC on Polygon</strong> — specifically the Circle-issued token at address <code>0x3c499c...3359</code>. The two chains use different tokens even though both are called USDC. Sending the wrong token to Polymarket fails silently.</p>
+                        <p>The canonical Base bridge (Base → Ethereum L1) has a 7-day fraud proof window — unusable for live trading. LI.FI's recommended routes (Across and CCTP) both deliver <strong>native USDC</strong> on Polygon in under 2 minutes with zero slippage.</p>
+                        <h5 class="pt-2">Bridging strategy: bridge on trade, not on deposit</h5>
+                        <p>NORT uses <strong>lazy bridging</strong> — funds stay on Base until a real trade is placed. This avoids wasting gas if the user never trades, and keeps funds on Base where they are accessible. When a real trade is triggered, the AutoTradeEngine initiates a LI.FI bridge, shows a <em>"Preparing trade…"</em> progress indicator, waits for the bridge confirmation (~1–2 min via polling), then submits the Polymarket order.</p>
                         <div class="callout-block callout-block-danger">
                             <div class="content">
                                 <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-exclamation-triangle"></i></span>Never use USDC.e</h4>
@@ -267,7 +304,25 @@
                     <section class="docs-section" id="item-3-2">
                         <h2 class="section-heading">LI.FI Route Selection</h2>
                         <p>LI.FI is not a bridge — it is a <strong>bridge aggregator</strong>. When the AutoTradeEngine needs to move USDC, it calls the LI.FI API once. LI.FI queries all available bridges simultaneously, compares them by output amount, speed, and cost, and selects the best route automatically.</p>
-                        <p>The backend calls LI.FI in two steps: first a quote (which shows the user estimated output, fee, and duration before committing), then an execute (which signs and submits the transaction from the user's Base wallet). The user can be notified of both steps or can set auto-confirm for seamless execution.</p>
+                        <p>The backend calls LI.FI exclusively — the frontend never calls it directly. The flow is three steps:</p>
+                        <div class="docs-code-block">
+                            <pre class="shadow-lg rounded"><code class="hljs"># Step 1: Get a bridge quote
+POST https://li.quest/v1/quote
+{
+  fromChain: 'BASE', toChain: 'POL',
+  fromToken: 'USDC', toToken: 'USDC',
+  fromAmount: '50000000',  // 50 USDC in 6 decimals
+  fromAddress: user_base_wallet,
+  toAddress: user_polygon_wallet
+}
+
+# Step 2: Execute — sign and submit the transaction via Privy
+# (the quote response contains a ready-to-sign transaction object)
+
+# Step 3: Poll for status
+GET https://li.quest/v1/status?txHash={hash}
+# Wait until status == 'DONE' before submitting Polymarket order</code></pre>
+                        </div>
                         <div class="table-responsive my-4">
                             <table class="table table-bordered">
                                 <tbody>
@@ -277,6 +332,14 @@
                                 </tbody>
                             </table>
                         </div>
+                        <h5 class="pt-2">Rate limit design</h5>
+                        <p>LI.FI's public API has rate limits (~60 req/min). Because bridge requests are user-specific and time-sensitive, the backend applies these mitigations:</p>
+                        <ul>
+                            <li><strong>Quote cache (30s TTL)</strong> — the same route quote is not refetched while the user is still on the trade confirmation screen</li>
+                            <li><strong>Backend queue</strong> — an <code>asyncio.Queue</code> with a semaphore of 3 concurrent LI.FI calls serialises simultaneous bridge requests</li>
+                            <li><strong>Exponential backoff on 429</strong> — retry cadence: 1s → 2s → 4s → 8s</li>
+                            <li><strong>LI.FI partner key</strong> — apply before launch; rate limits are significantly higher on the partner plan (free to request)</li>
+                        </ul>
                     </section>
 
                     <section class="docs-section" id="item-3-3">
@@ -632,7 +695,7 @@
                         <p>With Across as the bridge route (LI.FI's most common pick), bridging takes approximately 1–2 minutes. The Polymarket CLOB order submission takes a few seconds. Total end-to-end: roughly 2–3 minutes from AutoTradeEngine trigger to confirmed on-chain trade.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Do I need ETH to pay gas on Base?</h5>
-                        <p>No. NORT's Paymaster sponsors gas for all Base transactions. You only need USDC. Gas on Polygon for the Polymarket submission is either covered by the bridge relayer or by the Polymarket protocol.</p>
+                        <p>No. NORT's Privy Paymaster sponsors gas for all Base transactions. You only need USDC — never ETH. Gas on Polygon for the Polymarket submission is either covered by the bridge relayer (Across bundles MATIC into the delivery) or by the Polymarket protocol directly.</p>
                     </section>
 
                     <section class="docs-section" id="item-9-2">
