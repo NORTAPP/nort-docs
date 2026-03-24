@@ -872,7 +872,7 @@ GET https://li.quest/v1/status?txHash={hash}
                             <li>Trade confirmations include the market question, direction, entry price, and a Basescan link for any on-chain tx hash.</li>
                             <li>Wallet balances always show the USDC label. P&amp;L is prefixed with <code>+</code> or <code>-</code>.</li>
                             <li>Error messages are user-friendly — e.g. <em>"Insufficient balance — top up via /topup"</em>, <em>"Market not found or expired"</em>, <em>"You need to /authorize before using premium advice"</em>.</li>
-                            <li>All advice responses rendered in Telegram include the disclaimer <em>"This is not financial advice. Paper trading only."</em></li>
+                            <li>All advice responses rendered in Telegram include the disclaimer <em>"This is not financial advice. Real funds may be at risk."</em></li>
                         </ul>
                     </section>
 
@@ -941,7 +941,7 @@ GET https://li.quest/v1/status?txHash={hash}
                         <p>Yes. <code>/advice &lt;id&gt;</code> is available to all users at no cost and returns a brief summary with a recommendation. Full structured analysis via <code>/premium_advice</code> costs 0.10 USDC per query, deducted on Base.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Why does every advice response include a disclaimer?</h5>
-                        <p>It's a hard rule. Every OpenClaw response must include: <em>"This is not financial advice. Paper trading only."</em> This is enforced by the backend and cannot be omitted.</p>
+                        <p>It's a hard rule. Every OpenClaw response must include: <em>"This is not financial advice. Real funds may be at risk."</em> This is enforced by the backend and cannot be omitted.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>How accurate is the AI advice?</h5>
                         <p>OpenClaw bases its analysis on current market data, signal scores, recent news, and social sentiment. It provides a structured perspective — not a guarantee. Always treat it as one input among many, not a definitive prediction.</p>
