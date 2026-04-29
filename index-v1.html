@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>NORT — v2 Documentation</title>
+    <title>NORT — v1 Documentation</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="NORT v2 — Real Trading, x402 Payments, Base Smart Wallets, and Multi-Agent AI">
+    <meta name="description" content="NORT v1 — Polymarket AI Assistant Documentation">
     <link rel="shortcut icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script defer src="assets/fontawesome/js/all.min.js"></script>
@@ -14,6 +14,7 @@
 </head>
 
 <body class="index-page">
+
     <div class="page-header theme-bg-dark py-5 text-center position-relative">
         <div class="theme-bg-shapes-right"></div>
         <div class="theme-bg-shapes-left"></div>
@@ -27,27 +28,27 @@
                 <!-- Version Dropdown -->
                 <div class="dropdown" id="version-dropdown">
                     <button class="btn d-flex align-items-center gap-2" id="versionDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false"
-                        style="background:rgba(255,255,255,0.07);border:1px solid rgba(96,165,250,0.4);border-radius:20px;padding:6px 14px;color:#fff;font-size:0.8rem;font-family:'DM Mono',monospace;">
-                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#60A5FA;box-shadow:0 0 6px #60A5FA;margin-right:4px;"></span>
-                        v2.0 · On-Chain Trading
+                        style="background:rgba(255,255,255,0.07);border:1px solid rgba(45,212,191,0.35);border-radius:20px;padding:6px 14px;color:#fff;font-size:0.8rem;font-family:'DM Mono',monospace;">
+                        <span class="nort-live-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2DD4BF;box-shadow:0 0 6px #2DD4BF;margin-right:4px;"></span>
+                        v1.0 · Paper Trading
                         <i class="fas fa-chevron-down ms-1" style="font-size:0.65rem;opacity:0.7;"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="versionDropdownBtn"
                         style="background:rgba(10,22,40,0.97);border:1px solid rgba(45,212,191,0.25);border-radius:10px;min-width:220px;padding:8px;">
                         <li>
                             <a class="dropdown-item d-flex align-items-center gap-2" href="index-v1.html"
-                                style="color:rgba(255,255,255,0.65);border-radius:7px;padding:9px 12px;font-size:0.82rem;font-family:'DM Mono',monospace;">
+                                style="color:#fff;border-radius:7px;padding:9px 12px;font-size:0.82rem;font-family:'DM Mono',monospace;">
                                 <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2DD4BF;box-shadow:0 0 6px #2DD4BF;flex-shrink:0;"></span>
                                 v1.0 · Paper Trading
+                                <span style="margin-left:auto;font-size:0.7rem;color:#2DD4BF;opacity:0.8;">Current</span>
                             </a>
                         </li>
                         <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.1);margin:4px 0;"></li>
                         <li>
                             <a class="dropdown-item d-flex align-items-center gap-2" href="index.html"
-                                style="color:#fff;border-radius:7px;padding:9px 12px;font-size:0.82rem;font-family:'DM Mono',monospace;">
+                                style="color:rgba(255,255,255,0.75);border-radius:7px;padding:9px 12px;font-size:0.82rem;font-family:'DM Mono',monospace;">
                                 <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#60A5FA;box-shadow:0 0 6px #60A5FA;flex-shrink:0;"></span>
                                 v2.0 · On-Chain Trading
-                                <span style="margin-left:auto;font-size:0.7rem;color:#60A5FA;opacity:0.9;">Current</span>
                             </a>
                         </li>
                     </ul>
@@ -56,11 +57,10 @@
         </div>
 
         <div class="container">
-            <span class="nort-version mb-3 d-inline-block" style="background:rgba(96,165,250,0.15);color:#60A5FA;border-color:rgba(96,165,250,0.3);">VERSION 2.0 · BASE NETWORK</span>
-            <h1 class="page-heading single-col-max mx-auto mt-2">NORT v2 Documentation</h1>
+            <span class="nort-version mb-3 d-inline-block">VERSION 1.0 · STABLE</span>
+            <h1 class="page-heading single-col-max mx-auto mt-2">NORT Documentation</h1>
             <div class="page-intro single-col-max mx-auto">
-                Real Polymarket trading via Base smart wallets. x402 micro-payments for premium AI advice.
-                Multi-agent reasoning with conversation memory. USDC bridging via LI.FI. Auto-trade execution with copy trading. Kiswahili language support.
+                A Polymarket AI assistant — real-time market signals, quantitative scoring, agentic AI advice, and paper trading. Everything you need to understand how NORT v1 is built and how to run it.
             </div>
             <div class="main-search-box pt-4 d-block mx-auto">
                 <form class="search-form w-100">
@@ -81,10 +81,10 @@
                             <div class="card-body">
                                 <h5 class="card-title mb-3">
                                     <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-map-signs"></i></span>
-                                    <span class="card-title-text">What's New in v2</span>
+                                    <span class="card-title-text">Introduction</span>
                                 </h5>
-                                <div class="card-text">A full overview of everything added in v2 — real trading, on-chain wallet infrastructure, x402 payments, multi-agent AI, conversation memory, auto-trade execution, and copy trading.</div>
-                                <a class="card-link-mask" href="docs-page-v2.html#section-1"></a>
+                                <div class="card-text">What NORT is, how it works, and how the three-layer architecture connects Polymarket data, the backend, and both the web dashboard and Telegram bot.</div>
+                                <a class="card-link-mask" href="docs-page.html#section-1"></a>
                             </div>
                         </div>
                     </div>
@@ -93,78 +93,11 @@
                         <div class="card shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title mb-3">
-                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-wallet fa-fw"></i></span>
-                                    <span class="card-title-text">Base Smart Wallets</span>
+                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-arrow-down"></i></span>
+                                    <span class="card-title-text">Getting Started</span>
                                 </h5>
-                                <div class="card-text">How each NORT user gets a Coinbase Smart Wallet (ERC-4337) on Base. MPesa and card on-ramp via Transak. Gas sponsorship so users never need to buy ETH or MATIC manually.</div>
-                                <a class="card-link-mask" href="docs-page-v2.html#section-2"></a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-lg-4 py-3">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-right-left fa-fw"></i></span>
-                                    <span class="card-title-text">USDC Bridge (LI.FI)</span>
-                                </h5>
-                                <div class="card-text">How USDC moves from Base to Polygon for real Polymarket trades. LI.FI aggregates all bridge routes — Across, CCTP, Stargate — and auto-picks the fastest, cheapest path in a single SDK call.</div>
-                                <a class="card-link-mask" href="docs-page-v2.html#section-3"></a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-lg-4 py-3">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-lock fa-fw"></i></span>
-                                    <span class="card-title-text">x402 Payments</span>
-                                </h5>
-                                <div class="card-text">The HTTP-native micro-payment layer gating premium AI advice. Users pay $0.10 USDC on Base per query — no subscriptions, no API keys. Manual proof flow and automated client flow both covered.</div>
-                                <a class="card-link-mask" href="docs-page-v2.html#section-4"></a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-lg-4 py-3">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-robot fa-fw"></i></span>
-                                    <span class="card-title-text">Multi-Agent AI</span>
-                                </h5>
-                                <div class="card-text">
-                                    Multi-Agent AI orchestrates Technical, Sentiment, and Risk sub-agents in parallel for fast, secure, and personalized advice. Features include sliding window memory, auto-trading, premium gating, HMAC security, prompt injection defense, Kiswahili/English support, and structured JSON output.
-                                </div>
-                                <a class="card-link-mask" href="docs-page-v2.html#section-5"></a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-lg-4 py-3">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-bolt fa-fw"></i></span>
-                                    <span class="card-title-text">Auto-Trade Engine</span>
-                                </h5>
-                                <div class="card-text">When confidence is high enough, NORT executes a real Polymarket trade automatically from the user's smart wallet — no custody, no manual confirmation. Idempotency-protected and confidence-gated.</div>
-                                <a class="card-link-mask" href="docs-page-v2.html#section-6"></a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-lg-4 py-3">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-copy fa-fw"></i></span>
-                                    <span class="card-title-text">Copy Trading</span>
-                                </h5>
-                                <div class="card-text">Leader users whose trades meet a strict confidence threshold can be followed automatically. When a leader's AutoTradeEngine fires, the backend fans out the same trade to all opted-in followers.</div>
-                                <a class="card-link-mask" href="docs-page-v2.html#section-7"></a>
+                                <div class="card-text">How to access NORT — via the live dashboard at nortapp.online, via Telegram commands, or by launching the full Mini App inside Telegram.</div>
+                                <a class="card-link-mask" href="docs-page.html#section-2"></a>
                             </div>
                         </div>
                     </div>
@@ -174,10 +107,75 @@
                             <div class="card-body">
                                 <h5 class="card-title mb-3">
                                     <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-box fa-fw"></i></span>
-                                    <span class="card-title-text">v2 API Reference</span>
+                                    <span class="card-title-text">API Reference</span>
                                 </h5>
-                                <div class="card-text">All new v2 endpoints — real trade execution, x402 verification, conversation history, permission management, on-chain wallet balance, and copy trading controls.</div>
-                                <a class="card-link-mask" href="docs-page-v2.html#section-8"></a>
+                                <div class="card-text">All backend endpoints — fetching crypto and sports markets, retrieving ranked signals, requesting AI advice, placing paper trades, and querying wallet and leaderboard data.</div>
+                                <a class="card-link-mask" href="docs-page.html#section-3"></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4 py-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">
+                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-brain fa-fw"></i></span>
+                                    <span class="card-title-text">Signals Engine</span>
+                                </h5>
+                                <div class="card-text">How markets are scored and ranked — the liquidity filter, momentum and volume spike criteria, HOT/WARM/COOL signal labels, and plain-English reason strings.</div>
+                                <a class="card-link-mask" href="docs-page.html#section-4"></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4 py-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">
+                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-robot fa-fw"></i></span>
+                                    <span class="card-title-text">OpenClaw Agent</span>
+                                </h5>
+                                <div class="card-text">How the AI advice layer works — context gathering, OpenRouter integration, and the structured analysis output including summary, risk factors, and a suggested position.</div>
+                                <a class="card-link-mask" href="docs-page.html#section-5"></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4 py-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">
+                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-database fa-fw"></i></span>
+                                    <span class="card-title-text">Data &amp; Storage</span>
+                                </h5>
+                                <div class="card-text">What NORT stores in its Neon PostgreSQL cloud database — markets, signals, users, paper trades, wallet balances, and leaderboard snapshots.</div>
+                                <a class="card-link-mask" href="docs-page.html#section-6"></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4 py-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">
+                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-laptop-code fa-fw"></i></span>
+                                    <span class="card-title-text">Dashboard</span>
+                                </h5>
+                                <div class="card-text">The live web dashboard at nortapp.online — Feed, Signals, Trade, Leaderboard, Achievements, and Profile pages, plus the glassmorphism design system and Privy authentication.</div>
+                                <a class="card-link-mask" href="docs-page.html#section-7"></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4 py-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">
+                                    <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-paper-plane fa-fw"></i></span>
+                                    <span class="card-title-text">Telegram Bot</span>
+                                </h5>
+                                <div class="card-text">All Telegram bot commands for markets, signals, portfolio, and AI advice — plus how to launch the full NORT dashboard as a Telegram Mini App.</div>
+                                <a class="card-link-mask" href="docs-page.html#section-8"></a>
                             </div>
                         </div>
                     </div>
@@ -187,10 +185,10 @@
                             <div class="card-body">
                                 <h5 class="card-title mb-3">
                                     <span class="theme-icon-holder card-icon-holder me-2"><i class="fas fa-lightbulb fa-fw"></i></span>
-                                    <span class="card-title-text">v2 FAQs</span>
+                                    <span class="card-title-text">FAQs</span>
                                 </h5>
-                                <div class="card-text">Common questions about real vs paper mode, how x402 works, what happens when a bridge fails, how copy trading is protected, and how conversation memory is managed.</div>
-                                <a class="card-link-mask" href="docs-page-v2.html#section-9"></a>
+                                <div class="card-text">Common questions about paper trading, market categories, accessing NORT, AI advice, P&amp;L calculation, and using the Telegram Mini App.</div>
+                                <a class="card-link-mask" href="docs-page.html#section-9"></a>
                             </div>
                         </div>
                     </div>
@@ -204,19 +202,19 @@
         <div class="theme-bg-shapes-right"></div>
         <div class="theme-bg-shapes-left"></div>
         <div class="container">
-            <h3 class="mb-3">NORT v2 — Real Trading on Base</h3>
+            <h3 class="mb-3">NORT is live at nortapp.online</h3>
             <div class="section-intro mb-4 single-col-max mx-auto">
-                Smart wallets, x402 micro-payments, USDC bridging, multi-agent AI, and auto-trade execution — all built on Base.
+                Crypto and sports prediction markets, AI-powered signals, and paper trading — accessible via browser or Telegram. No installation required.
             </div>
             <div class="pt-2 text-center">
-                <a class="btn btn-light" href="docs-page-v2.html">Read v2 Documentation <i class="fas fa-arrow-alt-circle-right ms-2"></i></a>
+                <a class="btn btn-light" href="docs-page.html">Read Full Documentation <i class="fas fa-arrow-alt-circle-right ms-2"></i></a>
             </div>
         </div>
     </section>
 
     <footer class="footer">
         <div class="footer-bottom text-center py-5">
-            <small class="copyright">NORT v2.0 · Built on Base · <a href="https://www.nortapp.online/" target="_blank" style="color:var(--teal);">nortapp.online</a></small>
+            <small class="copyright">NORT v1.0 · Paper trading only · <a href="https://www.nortapp.online/" target="_blank" style="color:var(--teal);">nortapp.online</a></small>
         </div>
     </footer>
 
@@ -229,10 +227,11 @@
     <script src="assets/plugins/gumshoe/gumshoe.polyfills.min.js"></script>
     <script src="assets/js/docs.js"></script>
     <script>
-        // ── Index-v2 search ──
+
+        // ── Index page search: live suggestions from cards + redirect on Enter ──
         (function () {
-            const form  = document.querySelector('.search-form');
-            const input = form ? form.querySelector('.search-input') : null;
+            const form   = document.querySelector('.search-form');
+            const input  = form ? form.querySelector('.search-input') : null;
             if (!form || !input) return;
 
             const panel = document.createElement('div');
@@ -257,7 +256,7 @@
                     const linkEl  = card.querySelector('.card-link-mask');
                     const title   = titleEl ? titleEl.textContent.trim() : '';
                     const body    = textEl  ? textEl.textContent.trim()  : '';
-                    const href    = linkEl  ? linkEl.getAttribute('href') : 'docs-page-v2.html';
+                    const href    = linkEl  ? linkEl.getAttribute('href') : 'docs-page.html';
                     if (title) index.push({ title, body, href, text: title + ' ' + body });
                 });
                 return index;
@@ -320,10 +319,10 @@
             var debouncedShow = debounce(showSuggestions, 180);
             input.addEventListener('input', function() { var val = input.value.trim(); if (val === '') { panel.style.display='none'; return; } debouncedShow(val); });
             input.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') { e.preventDefault(); var q = input.value.trim(); if (q.length >= 2) window.location.href = 'docs-page-v2.html?q=' + encodeURIComponent(q); }
+                if (e.key === 'Enter') { e.preventDefault(); var q = input.value.trim(); if (q.length >= 2) window.location.href = 'docs-page.html?q=' + encodeURIComponent(q); }
                 if (e.key === 'Escape') { panel.style.display='none'; input.blur(); }
             });
-            form.addEventListener('submit', function(e) { e.preventDefault(); var q = input.value.trim(); if (q.length >= 2) window.location.href = 'docs-page-v2.html?q=' + encodeURIComponent(q); });
+            form.addEventListener('submit', function(e) { e.preventDefault(); var q = input.value.trim(); if (q.length >= 2) window.location.href = 'docs-page.html?q=' + encodeURIComponent(q); });
         })();
     </script>
 </body>
