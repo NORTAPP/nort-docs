@@ -148,21 +148,13 @@
                     <li class="nav-item"><a class="nav-link scrollto" href="#item-7-3">Authentication</a></li>
 
                     <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-8"><span class="theme-icon-holder me-2"><i class="fas fa-paper-plane"></i></span>Telegram Bot</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-1">Architecture &amp; Routing</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-2">Onboarding &amp; Wallet</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-3">Full Command Reference</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-4">Response Formatting</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-5">Mini App (WebApp)</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-1">Command Reference</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-8-2">Mini App (WebApp)</a></li>
 
-                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-9"><span class="theme-icon-holder me-2"><i class="fas fa-coins"></i></span>x402 Payments</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-1">What is x402?</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-2">Payment Flow</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-3">Premium Advice</a></li>
-
-                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-10"><span class="theme-icon-holder me-2"><i class="fas fa-lightbulb"></i></span>FAQs</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-10-1">General</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-10-2">Paper Trading</a></li>
-                    <li class="nav-item"><a class="nav-link scrollto" href="#item-10-3">AI Advice</a></li>
+                    <li class="nav-item section-title mt-3"><a class="nav-link scrollto" href="#section-9"><span class="theme-icon-holder me-2"><i class="fas fa-lightbulb"></i></span>FAQs</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-1">General</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-2">Paper Trading</a></li>
+                    <li class="nav-item"><a class="nav-link scrollto" href="#item-9-3">AI Advice</a></li>
                 </ul>
             </nav>
         </div>
@@ -688,165 +680,42 @@
                     <header class="docs-header">
                         <h1 class="docs-heading">Telegram Bot</h1>
                         <section class="docs-intro">
-                            <p>The NORT Telegram bot is the primary text-based interface for the system — every command, every payment, every response flows through here. It is implemented using <strong>python-telegram-bot</strong> (async) and runs in webhook mode in production. The bot contains no business logic — it formats requests, routes them to the correct FastAPI endpoint, and formats the response back to the user.</p>
+                            <p>The NORT Telegram bot is the primary text-based interface for fast access to markets, signals, paper trading, and AI advice. It never reads from the database directly — all calls go through the backend API.</p>
                         </section>
                     </header>
 
                     <section class="docs-section" id="item-8-1">
-                        <h2 class="section-heading">Architecture &amp; Routing</h2>
-                        <p>The bot acts as a thin routing layer between the user and the backend. Every command maps to a specific FastAPI endpoint or service call. The bot itself never queries the database or calls the AI — those responsibilities belong to the backend and the OpenClaw agent respectively.</p>
-
-                        <p>All requests take one of two paths through the system:</p>
+                        <h2 class="section-heading">Command Reference</h2>
                         <div class="table-responsive my-4">
                             <table class="table table-bordered">
                                 <tbody>
                                     <tr>
-                                        <th class="theme-bg-light">Fast Path</th>
-                                        <td>Used for market data, signals, portfolio checks, and paper trades. The bot calls the FastAPI backend directly. No AI is invoked. Response is near-instant.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light">Agent Path</th>
-                                        <td>Used only for <code>/advice</code> and <code>/premium_advice</code>. The request is routed through <code>POST /agent/advice</code>, which triggers OpenClaw. This path is slower and consumes AI tokens.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="callout-block callout-block-warning">
-                            <div class="content">
-                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-bullhorn"></i></span>Webhook in Production</h4>
-                                <p>The bot is configured for <strong>webhook mode</strong> in production rather than long polling. The FastAPI app exposes the webhook endpoint, which is registered with Telegram. Async handlers ensure concurrent updates are processed correctly without blocking.</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="docs-section" id="item-8-2">
-                        <h2 class="section-heading">Onboarding &amp; Wallet Setup</h2>
-                        <p>When a new user sends <code>/start</code>, the bot walks them through account creation and wallet authorization before any trading commands are available.</p>
-
-                        <h5>New user flow:</h5>
-                        <ol>
-                            <li>User sends <code>/start</code> — the bot registers their Telegram ID and creates an account.</li>
-                            <li>The bot prompts wallet creation via the CDP SDK (handled by the wallet service).</li>
-                            <li>The bot prompts the user to run <code>/authorize &lt;max_usdc&gt;</code>, which sets an ERC-20 spending allowance on-chain. This allowance is stored in the database and is required before <code>/premium_advice</code> can deduct USDC.</li>
-                            <li>User is shown an overview of available commands and a link to the Mini App dashboard.</li>
-                        </ol>
-
-                        <div class="callout-block callout-block-info">
-                            <div class="content">
-                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-info-circle"></i></span>Wallet linking</h4>
-                                <p>Users can also connect an existing MetaMask wallet by running <code>/wallet connect</code> from the dashboard, which calls <code>POST /wallet/connect</code>. Once linked, the Telegram ID and wallet address are associated in the database, and the same paper balance and trade history are accessible from both interfaces.</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="docs-section" id="item-8-3">
-                        <h2 class="section-heading">Full Command Reference</h2>
-                        <p>All 14 commands are implemented and tested end-to-end. Commands are split by path type below.</p>
-
-                        <h5 class="mt-4">Account &amp; Setup</h5>
-                        <div class="table-responsive my-3">
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <tr>
                                         <th class="theme-bg-light"><code>/start</code></th>
-                                        <td>Registers the user, triggers wallet creation, and shows onboarding instructions. Fast path.</td>
+                                        <td>Starts the bot and registers your account. Shows an overview of available commands and links to the dashboard Mini App.</td>
                                     </tr>
-                                    <tr>
-                                        <th class="theme-bg-light"><code>/authorize &lt;max_usdc&gt;</code></th>
-                                        <td>Sets an ERC-20 USDC spending allowance on-chain. Required before premium advice can deduct funds. Example: <code>/authorize 5</code> authorises up to $5 USDC. Fast path.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light"><code>/mode &lt;PAPER|REAL&gt;</code></th>
-                                        <td>Switches trading mode. <code>PAPER</code> simulates all trades without on-chain execution. <code>REAL</code> calls the actual Polymarket CLOB API using the user's wallet. Mode is stored in the database per user.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <h5 class="mt-4">Markets &amp; Signals <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">Fast Path</span></h5>
-                        <div class="table-responsive my-3">
-                            <table class="table table-bordered">
-                                <tbody>
                                     <tr>
                                         <th class="theme-bg-light"><code>/trending</code></th>
-                                        <td>Returns the top markets by current 24hr volume across crypto and sports. No AI involved.</td>
+                                        <td>Returns the top markets by current volume. Fast path — no AI involved. Shows crypto and sports markets only.</td>
                                     </tr>
                                     <tr>
                                         <th class="theme-bg-light"><code>/market &lt;id&gt;</code></th>
-                                        <td>Returns full detail for a single market — question, current odds, volume, category, and expiry date.</td>
+                                        <td>Returns full detail for a single market — question, odds, volume, category, and expiry. Fast path.</td>
                                     </tr>
                                     <tr>
                                         <th class="theme-bg-light"><code>/signals</code></th>
-                                        <td>Returns the top 20 ranked signals with composite scores and plain-English reason strings from the Signals Engine.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <h5 class="mt-4">Portfolio &amp; Trading <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">Fast Path</span></h5>
-                        <div class="table-responsive my-3">
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <th class="theme-bg-light"><code>/wallet</code></th>
-                                        <td>Returns your paper wallet summary — current balance, net P&amp;L, total trade count, and open positions.</td>
+                                        <td>Returns the top-ranked signals with scores and plain-English reason strings. Fast path.</td>
                                     </tr>
                                     <tr>
-                                        <th class="theme-bg-light"><code>/topup &lt;amount_kes&gt;</code></th>
-                                        <td>Initiates an M-Pesa STK push for the given KES amount. Converts to USDC at live FX rate and triggers the Daraja API payment flow. On confirmation, balance is credited.</td>
+                                        <th class="theme-bg-light"><code>/portfolio</code></th>
+                                        <td>Returns your paper wallet summary — balance, net P&amp;L, and open trades. Fast path.</td>
                                     </tr>
                                     <tr>
-                                        <th class="theme-bg-light"><code>/positions</code></th>
-                                        <td>Lists all open paper trades — market question, direction (YES/NO), entry price, shares, and current mark-to-market value.</td>
+                                        <th class="theme-bg-light"><code>/papertrade &lt;id&gt; &lt;YES|NO&gt; &lt;amount&gt;</code></th>
+                                        <td>Logs a paper trade. Example: <code>/papertrade market-001 YES 50</code> places a $50 paper bet on YES. Fast path.</td>
                                     </tr>
-                                    <tr>
-                                        <th class="theme-bg-light"><code>/trade &lt;id&gt; &lt;YES|NO&gt; &lt;amount&gt;</code></th>
-                                        <td>Places a paper trade (or real trade if in REAL mode). Example: <code>/trade market-001 YES 50</code>. In PAPER mode, calls <code>POST /papertrade</code>. In REAL mode, calls <code>execute_trade()</code> via the wallet service.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light"><code>/close &lt;trade_id&gt;</code></th>
-                                        <td>Exits an open position at the current market price. Calls <code>POST /trade/sell/{id}</code>. P&amp;L is calculated at close using live odds and stored in the database.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <h5 class="mt-4">AI Advice <span class="badge" style="font-size:0.7rem;background:rgba(45,212,191,0.2);color:var(--teal);border:1px solid rgba(45,212,191,0.3);">Agent Path</span></h5>
-                        <div class="table-responsive my-3">
-                            <table class="table table-bordered">
-                                <tbody>
                                     <tr>
                                         <th class="theme-bg-light"><code>/advice &lt;id&gt;</code></th>
-                                        <td>Free OpenClaw analysis for any market. Returns a 2-sentence summary with a recommendation (BUY YES / BUY NO / WAIT). Calls <code>POST /agent/advice</code>.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light"><code>/premium_advice &lt;id&gt;</code></th>
-                                        <td>Full structured analysis — summary, why trending, risk factors, confidence score, and suggested position. Requires a USDC balance of ≥ 0.10 and a prior <code>/authorize</code>. Deducts via the CDP SDK and confirms the tx hash on Base before unlocking the response. See <a href="#section-9">x402 Payments</a> for the full flow.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <h5 class="mt-4">Social &amp; Copy Trading <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">Fast Path</span></h5>
-                        <div class="table-responsive my-3">
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <th class="theme-bg-light"><code>/leaders</code></th>
-                                        <td>Shows the leaderboard — top traders ranked by portfolio value and P&amp;L, with their badges and win rates.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light"><code>/copy &lt;username&gt; &lt;pct&gt;</code></th>
-                                        <td>Subscribes to copy-trade a leader. Whenever the leader places a trade, the bot automatically mirrors it proportionally based on <code>pct</code> of your balance. Example: <code>/copy alice 10</code> allocates 10% of your balance to copy Alice's trades.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light"><code>/uncopy &lt;username&gt;</code></th>
-                                        <td>Stops copy-trading the specified leader. Existing open positions are not affected.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light"><code>/myfollowers</code></th>
-                                        <td>Shows who is currently copy-trading you — display names, allocation percentages, and total capital following you.</td>
+                                        <td>Requests OpenClaw AI analysis for the specified market. Agent path — slightly slower as it calls the AI.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -855,157 +724,28 @@
                         <div class="callout-block callout-block-success">
                             <div class="content">
                                 <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-thumbs-up"></i></span>No business logic in the bot</h4>
-                                <p>The bot only routes and formats. All scoring, trading, payment verification, and AI advice logic lives in the backend services. This guarantees that the bot and dashboard always show identical, consistent data.</p>
+                                <p>The Telegram bot only formats requests and responses. All scoring, trading, and advice logic lives in the backend. This means the bot and dashboard always show identical, consistent data.</p>
                             </div>
                         </div>
                     </section>
 
-                    <section class="docs-section" id="item-8-4">
-                        <h2 class="section-heading">Response Formatting</h2>
-                        <p>All bot responses are formatted for readability on mobile using Telegram Markdown. The formatting rules are enforced across all commands:</p>
-                        <ul>
-                            <li>Market questions are displayed in bold. Odds and scores use monospace code formatting.</li>
-                            <li>Trade confirmations include the market question, direction, entry price, and a Basescan link for any on-chain tx hash.</li>
-                            <li>Wallet balances always show the USDC label. P&amp;L is prefixed with <code>+</code> or <code>-</code>.</li>
-                            <li>Error messages are user-friendly — e.g. <em>"Insufficient balance — top up via /topup"</em>, <em>"Market not found or expired"</em>, <em>"You need to /authorize before using premium advice"</em>.</li>
-                            <li>All advice responses rendered in Telegram include the disclaimer <em>"This is not financial advice. Paper trading only."</em></li>
-                        </ul>
-                    </section>
-
-                    <section class="docs-section" id="item-8-5">
+                    <section class="docs-section" id="item-8-2">
                         <h2 class="section-heading">Mini App (WebApp)</h2>
-                        <p>NORT supports the <strong>Telegram Mini App</strong> standard. The full NORT dashboard at <a href="https://www.nortapp.online/" target="_blank">nortapp.online</a> can be launched directly inside Telegram as an embedded WebApp, giving users the complete visual experience without leaving the app.</p>
-                        <p>To open the Mini App, tap the menu or app button within your NORT bot chat. All dashboard pages — Feed, Signals, Trade, Leaderboard, Achievements, and Profile — are fully accessible from within the Mini App. User identity from the Telegram session is passed to the dashboard automatically, so no separate login is required.</p>
+                        <p>In addition to text commands, NORT supports the <strong>Telegram Mini App</strong> standard. This means the full NORT dashboard at <a href="https://www.nortapp.online/" target="_blank">nortapp.online</a> can be launched directly inside Telegram as an embedded WebApp — giving users the complete visual dashboard experience without leaving the Telegram app.</p>
+
+                        <p>To open the Mini App, tap the menu or app button within your NORT bot chat. The dashboard will load in a full-screen overlay inside Telegram. All features — Feed, Signals, Trade, Leaderboard, Achievements, and Profile — are fully accessible from within the Mini App.</p>
 
                         <div class="callout-block callout-block-info">
                             <div class="content">
                                 <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-info-circle"></i></span>Two ways to use NORT via Telegram</h4>
-                                <p>Use text commands for quick queries, or open the full Mini App for the complete visual dashboard — both are available from the same Telegram chat.</p>
+                                <p>You can use the bot with text commands for quick queries, or open the full Mini App for the complete visual dashboard — both are available from the same Telegram chat.</p>
                             </div>
                         </div>
                     </section>
                 </article>
 
-                <!-- SECTION 9 — x402 PAYMENTS -->
+                <!-- SECTION 9 — FAQs -->
                 <article class="docs-article" id="section-9">
-                    <header class="docs-header">
-                        <h1 class="docs-heading">x402 Payments</h1>
-                        <section class="docs-intro">
-                            <p>NORT uses the <strong>x402</strong> micro-payment protocol to gate premium AI advice. Instead of a monthly subscription, users pay per query using real USDC on Base. The payment flow is handled entirely within the Telegram bot — no external wallet app or browser extension is required for users who have already authorized a spending limit.</p>
-                        </section>
-                    </header>
-
-                    <section class="docs-section" id="item-9-1">
-                        <h2 class="section-heading">What is x402?</h2>
-                        <p>x402 is an HTTP-native micro-payment protocol built on Base. It works by checking the user's on-chain wallet balance and triggering a USDC deduction via the CDP SDK before unlocking a premium response. Each advice query costs a fixed small amount of USDC — there is no subscription, no monthly fee, and no payment if the query fails.</p>
-
-                        <p>The protocol is designed to be invisible to the user once authorization is set. The first time a user requests premium advice, the bot checks whether they have run <code>/authorize</code>. After that, the deduction happens automatically with every <code>/premium_advice</code> call, and the user receives a transaction hash as proof of payment on Base.</p>
-
-                        <div class="table-responsive my-4">
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <th class="theme-bg-light">Free Advice</th>
-                                        <td><code>/advice &lt;id&gt;</code> — available to all users at no cost. Returns a brief 2-sentence summary with a recommendation. No USDC deduction.</td>
-                                    </tr>
-                                    <tr>
-                                        <th class="theme-bg-light">Premium Advice</th>
-                                        <td><code>/premium_advice &lt;id&gt;</code> — costs 0.10 USDC per query. Returns the full structured analysis including confidence score, risk factors, and detailed reasoning. Requires prior authorization.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-
-                    <section class="docs-section" id="item-9-2">
-                        <h2 class="section-heading">Payment Flow</h2>
-                        <p>The complete flow from command to advice unlock:</p>
-
-                        <ol>
-                            <li>User sends <code>/premium_advice &lt;market-id&gt;</code> in Telegram.</li>
-                            <li>The bot checks whether the user has run <code>/authorize</code>. If not, the bot replies: <em>"Premium feature. Run /authorize &lt;max_usdc&gt; to set a spending limit first."</em></li>
-                            <li>If authorized, the bot checks the user's USDC balance via the wallet service. If balance is below 0.10 USDC, the bot replies: <em>"Insufficient balance — top up via /topup."</em></li>
-                            <li>If balance is sufficient, the bot calls the CDP SDK to trigger the USDC deduction from the user's Base wallet.</li>
-                            <li>The backend confirms the transaction hash on Base. The tx hash is stored in the <code>payments</code> table with <code>is_confirmed = true</code>.</li>
-                            <li>With payment confirmed, the bot calls <code>POST /agent/advice</code> with <code>premium: true</code>. OpenClaw runs the full analysis and returns the structured response.</li>
-                            <li>The bot formats and sends the full advice response to the user, including the tx hash as a Basescan link for transparency.</li>
-                        </ol>
-
-                        <div class="callout-block callout-block-warning">
-                            <div class="content">
-                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-tags"></i></span>Backend always verifies</h4>
-                                <p>The bot never trusts its own state for payment verification. Every <code>/premium_advice</code> call goes through the backend payment check — the tx hash must be confirmed on-chain before OpenClaw is invoked. A payment that fails on-chain never unlocks the premium response.</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="docs-section" id="item-9-3">
-                        <h2 class="section-heading">Premium vs Free Advice Output</h2>
-                        <p>The two advice tiers return structurally different responses. Both go through OpenClaw and the same <code>POST /agent/advice</code> endpoint, but the <code>premium: true</code> flag in the request unlocks deeper output:</p>
-
-                        <div class="table-responsive my-4">
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <th class="theme-bg-light">Field</th>
-                                        <th class="theme-bg-light">Free (<code>/advice</code>)</th>
-                                        <th class="theme-bg-light">Premium (<code>/premium_advice</code>)</th>
-                                    </tr>
-                                    <tr>
-                                        <td>Summary</td>
-                                        <td>✓ 1–2 sentences</td>
-                                        <td>✓ Full paragraph</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Recommendation</td>
-                                        <td>✓ BUY YES / BUY NO / WAIT</td>
-                                        <td>✓ BUY YES / BUY NO / WAIT</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Why Trending</td>
-                                        <td>–</td>
-                                        <td>✓ Full signal + news context</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Risk Factors</td>
-                                        <td>–</td>
-                                        <td>✓ 3+ enumerated risks</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Confidence Score</td>
-                                        <td>–</td>
-                                        <td>✓ 0.0–1.0 normalised</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Position Sizing</td>
-                                        <td>–</td>
-                                        <td>✓ Guidance based on wallet context</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Disclaimer</td>
-                                        <td>✓ Always included</td>
-                                        <td>✓ Always included</td>
-                                    </tr>
-                                    <tr>
-                                        <td>USDC cost</td>
-                                        <td>Free</td>
-                                        <td>0.10 USDC per query</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="callout-block callout-block-danger">
-                            <div class="content">
-                                <h4 class="callout-title"><span class="callout-icon-holder me-1"><i class="fas fa-exclamation-triangle"></i></span>Disclaimer is non-negotiable</h4>
-                                <p>Both free and premium advice responses always include: <em>"This is not financial advice. Paper trading only."</em> This is enforced by the backend and cannot be omitted regardless of the advice tier.</p>
-                            </div>
-                        </div>
-                    </section>
-                </article>
-
-                <!-- SECTION 10 — FAQs -->
-                <article class="docs-article" id="section-10">
                     <header class="docs-header">
                         <h1 class="docs-heading">FAQs</h1>
                         <section class="docs-intro">
@@ -1013,11 +753,11 @@
                         </section>
                     </header>
 
-                    <section class="docs-section" id="item-10-1">
+                    <section class="docs-section" id="item-9-1">
                         <h2 class="section-heading">General</h2>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Is any real money involved?</h5>
-                        <p>In paper trading mode — no. All trades are simulated with a virtual balance. If you switch to REAL mode using <code>/mode REAL</code>, trades are executed on-chain via your Base wallet using the Polymarket CLOB API. The x402 payment for premium advice deducts real USDC on Base regardless of trading mode.</p>
+                        <p>No. NORT v1 is paper trading only. No real Polymarket trades are ever placed. No real funds are moved at any point. All trades are simulated using a virtual balance.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>What markets does NORT cover?</h5>
                         <p>NORT v1 covers <span class="kw-teal">crypto</span> and <span class="kw-teal">sports</span> prediction markets on Polymarket. Other market categories are not included in this version.</p>
@@ -1035,39 +775,36 @@
                         <p>Yes. The dashboard at <a href="https://www.nortapp.online/" target="_blank">nortapp.online</a> is fully standalone. Telegram is optional — the web dashboard has the full feature set.</p>
                     </section>
 
-                    <section class="docs-section" id="item-10-2">
+                    <section class="docs-section" id="item-9-2">
                         <h2 class="section-heading">Paper Trading</h2>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>What is my starting balance?</h5>
                         <p>Every new user starts with $1,000 in paper USDC. This balance is tracked against all your paper trades and is used to compute your P&amp;L and leaderboard ranking.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>How is P&amp;L calculated?</h5>
-                        <p>P&amp;L is recorded when a trade closes, based on the final market outcome versus your entry price. For open trades, mark-to-market value is calculated using current live odds. You can see this via <code>/positions</code> or the Trade page on the dashboard.</p>
+                        <p>P&amp;L is recorded when a trade closes, based on the final market outcome versus your entry price. For open trades, an estimated P&amp;L is shown using the current market odds. The dashboard and Telegram both read this from the same backend.</p>
 
-                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Can I exit a trade early?</h5>
-                        <p>Yes. Use <code>/close &lt;trade_id&gt;</code> to exit an open position at the current market price. The payout is calculated as shares × current odds, and the P&amp;L is stored immediately.</p>
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>What is the Commit button in the dashboard?</h5>
+                        <p>The Commit button is a demo feature that optionally logs a trade receipt to Polygon testnet and returns a transaction hash. No real money is involved — it's purely to demonstrate on-chain logging capability.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Can I trade from both the dashboard and Telegram?</h5>
-                        <p>Yes. Trades placed via Telegram commands and via the dashboard are both recorded to the same account. Your portfolio, balance, and history are consistent across both interfaces.</p>
+                        <p>Yes. Paper trades placed via Telegram commands and via the dashboard are both recorded to the same account. Your portfolio, balance, and history are consistent across both interfaces.</p>
                     </section>
 
-                    <section class="docs-section" id="item-10-3">
+                    <section class="docs-section" id="item-9-3">
                         <h2 class="section-heading">AI Advice</h2>
 
-                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Is basic AI advice free?</h5>
-                        <p>Yes. <code>/advice &lt;id&gt;</code> is available to all users at no cost and returns a brief summary with a recommendation. Full structured analysis via <code>/premium_advice</code> costs 0.10 USDC per query, deducted on Base.</p>
+                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Is AI advice free?</h5>
+                        <p>Yes, in v1 AI advice via <code>/advice</code> is available to all users at no cost. Premium gating is planned for a future version.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Why does every advice response include a disclaimer?</h5>
                         <p>It's a hard rule. Every OpenClaw response must include: <em>"This is not financial advice. Paper trading only."</em> This is enforced by the backend and cannot be omitted.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>How accurate is the AI advice?</h5>
-                        <p>OpenClaw bases its analysis on current market data, signal scores, recent news, and social sentiment. It provides a structured perspective — not a guarantee. Always treat it as one input among many, not a definitive prediction.</p>
+                        <p>OpenClaw bases its analysis on current market data, signal scores, and recent news. It provides a structured perspective — not a guarantee. Always treat it as one input among many, not a definitive prediction.</p>
 
                         <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>Can OpenClaw see my trade history?</h5>
-                        <p>Yes. When generating advice, OpenClaw has access to your paper wallet summary via <code>GET /wallet/summary</code>. This allows it to factor in whether you already have an open position in the market being analysed, and to tailor position sizing guidance accordingly in premium mode.</p>
-
-                        <h5 class="pt-3"><i class="fas fa-question-circle me-1"></i>What happens if my USDC balance is too low for premium advice?</h5>
-                        <p>The bot will reply with a friendly error message and prompt you to top up via <code>/topup &lt;amount_kes&gt;</code>. No USDC is deducted and no advice is returned until the balance check passes.</p>
+                        <p>Yes. When generating advice, OpenClaw has access to your paper wallet summary. This allows it to factor in whether you already have an open position in the market being analysed.</p>
                     </section>
                 </article>
 
